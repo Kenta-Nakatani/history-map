@@ -23,7 +23,7 @@
         }
         #details {
             width: 25%;
-            height: 80vh;
+            max-height: 80vh;
             position: absolute;
             right: 0;
             top: 0;
@@ -31,6 +31,7 @@
             background: rgba(44, 44, 44, 0.9);
             box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
             display: none;
+            overflow-y: auto;
         }
         #details h3 {
             margin-top: 0;
@@ -71,7 +72,7 @@
             padding: 5px 10px;
             border-radius: 5px;
             color: black;
-            font-size: 16px;
+            font-size: 20px;
             text-align: center;
         }
     </style>
@@ -110,10 +111,13 @@
     let currentMarker = null;
 
     // CSVデータを読み込む
-    Papa.parse('https://gist.githubusercontent.com/Nakatani-Kenta/e3c184628d793e7e98c508743e4a6c53/raw/598b51541a11e6cee25a17c9c377e2f685193221/map.csv', {
+    Papa.parse('map.csv', {
         download: true,
         header: true,
         skipEmptyLines: true,
+        error: function(err) {
+            console.error("CSV読み込みエラー: ", err);
+        },
         complete: function(results) {
             const events = results.data;
 
@@ -123,17 +127,14 @@
                 const index = parseInt(slider.value);
                 const event = events[index];
 
+                if (!event) return;
+
                 // 緯度経度を数値に変換
                 const latitude = parseFloat(event.latitude);
                 const longitude = parseFloat(event.longitude);
 
-                // 緯度経度が有効かどうかチェック
-                if (isNaN(longitude) || isNaN(latitude)) {
-                    console.error(`無効な緯度経度: (${event.longitude}, ${event.latitude})`);
-                    return; // 無効な場合は処理をスキップ
-                }
+                if (isNaN(longitude) || isNaN(latitude)) return;
 
-                // 地図移動とマーカー更新
                 map.flyTo({
                     center: [longitude, latitude],
                     zoom: 10,
@@ -148,7 +149,6 @@
                     .setLngLat([longitude, latitude])
                     .addTo(map);
 
-                // 詳細ウィンドウ更新
                 detailsContainer.style.display = 'block';
                 detailsContainer.innerHTML = `
                     <button class="close-btn">閉じる</button>
@@ -158,21 +158,17 @@
                     <p><strong>時代背景:</strong> ${event.context}</p>
                 `;
 
-                // 日付ウィンドウの更新 (MM月YYYY年形式)
-                const formattedDate = `${event.month}月${event.year}年`;
-                dateWindow.textContent = formattedDate;
+                detailsContainer.scrollTop = 0;
+                dateWindow.textContent = `${event.month}月${event.year}年`;
 
                 detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
                     detailsContainer.style.display = 'none';
                 });
             });
 
-            // 初期表示
             slider.dispatchEvent(new Event('input'));
         }
     });
 </script>
 </body>
 </html>
-
-
