@@ -158,6 +158,8 @@
                     <p>${event.description}</p>
                     <p><strong>時代背景:</strong> ${event.context}</p>
                 `;
+                   // スクロール位置をリセット
+    detailsContainer.scrollTop = 0;
 
                 // 日付ウィンドウの更新 (MM月YYYY年形式)
                 const formattedDate = `${event.month}月${event.year}年`;
