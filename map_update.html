@@ -45,18 +45,24 @@
             border-radius: 5px;
             margin-bottom: 10px;
         }
-        #timeline {
-            height: 70px;
-            background: #1B1B3A;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-top: 1px solid #8B0000;
-            position: relative;
-        }
-        #slider {
-            width: 80%;
-        }
+        #timeline-bar {
+            position: absolute; /* 絶対位置で配置 */
+            bottom: 20px; /* 画面下部からの距離 */
+            left: 50%; /* 水平中央 */
+            transform: translateX(-50%); /* 中央寄せ */
+            width: 45%; /* バーの幅（調整可） */
+            height: 40px; /* 高さ（調整可） */
+            background: rgba(0, 0, 0, 0.5); /* 半透明（黒） */
+            border-radius: 10px; /* 角を丸く */
+            display: flex; /* 横並びにする場合 */
+            align-items: center; /* 垂直中央揃え */
+            justify-content: space-evenly; /* 要素を均等配置 */
+            z-index: 10; /* マップより上に配置 */
+            backdrop-filter: blur(5px); /* 背景ぼかし効果 */
+            padding: 5px 10px; /* 内側の余白 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* 浮いて見える効果 */
+        }   
+
         #details img {
             width: 80%;
             margin: 10px auto;
@@ -80,12 +86,15 @@
     
 </head>
 <body>
+    <div id="map">
+        <div id="timeline-bar">
+            <input type="range" id="slider" min="0" value="0">
+            <div id="date-window">06月1944年</div> 
+        </div>
+    </div>
+    
 
-<div id="map"></div>
-<div id="timeline">
-    <input type="range" id="slider" min="0" value="0">
-    <div id="date-window">06月1944年</div>
-</div>
+
 <div id="details">
     <button class="close-btn">閉じる</button>
     <h3>事件の詳細</h3>
