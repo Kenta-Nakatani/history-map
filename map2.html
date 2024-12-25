@@ -114,6 +114,7 @@
             background: rgba(255, 255, 255, 0.8);
             transform: scale(0.9); /* クリック時に縮小 */
         }
+        
 
 
 
@@ -137,8 +138,8 @@
                 <!-- 右側: ボーダーエリア -->
                 <div id="border-area">
 
-            <input type="range" id="slider" min="0" value="0">
-            <div id="date-window">06月1944年</div> 
+                <input type="range" id="slider" min="0" value="0">
+                <div id="date-window">06月1944年</div> 
         </div>
         
     </div>
@@ -225,15 +226,13 @@
                     <p><strong>時代背景:</strong> ${event.context}</p>
                 `;
                    // スクロール位置をリセット
-    detailsContainer.scrollTop = 0;
+                    detailsContainer.scrollTop = 0;
 
                 // 日付ウィンドウの更新 (MM月YYYY年形式)
                 const formattedDate = `${event.month}月${event.year}年`;
                 dateWindow.textContent = formattedDate;
 
-                detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
-                    detailsContainer.style.display = 'none';
-                });
+
             });
             
 

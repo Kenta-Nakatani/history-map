@@ -23,7 +23,7 @@
         }
         #details {
             width: 25%;
-            height: 80vh; /* 高さを調整 */
+            height: 80vh;
             position: absolute;
             right: 0;
             top: 0;
@@ -31,6 +31,7 @@
             background: rgba(44, 44, 44, 0.9);
             box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
             display: none;
+            overflow-y: auto; /* 縦方向スクロールを有効化 */
         }
         #details h3 {
             margin-top: 0;
@@ -44,129 +45,183 @@
             border-radius: 5px;
             margin-bottom: 10px;
         }
-        #timeline {
-            height: 70px;
-            background: #1B1B3A;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-top: 1px solid #8B0000;
-        }
-        #slider {
-            width: 80%;
-        }
-        #slider-labels {
-            display: flex;
-            justify-content: space-between;
-            width: 80%;
-            font-size: 12px;
-            margin-top: 5px;
-        }
+
         #details img {
             width: 80%;
             margin: 10px auto;
             display: block;
             border-radius: 5px;
         }
+        /* タイムラインバー全体 */
+        #timeline-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 左側のボタンエリア */
+        #button-area {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex: 1; /* 左側エリアを拡大 */
+            padding-left: 10px;
+        }
+
+        /* 右側のボーダーエリア */
+        #border-area {
+            flex: 1; /* 右側エリアを拡大 */
+            border-left: 2px solid rgba(255, 255, 255, 0.6); /* 境界線 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+        }
+
+        /* ボタンのスタイル */
+        .timeline-button {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%; /* 丸いボタン */
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            margin: 0 5px;
+
+        }
+
+        .timeline-button:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1); /* マウスオーバーで拡大 */
+        }
+
+        .timeline-button:active {
+            background: rgba(255, 255, 255, 0.8);
+            transform: scale(0.9); /* クリック時に縮小 */
+        }
     </style>
 </head>
 <body>
+    <div id="map"></div>
 
-<div id="map"></div>
-<div id="timeline">
-    <input type="range" id="slider" min="0" value="0">
-    <div id="slider-labels"></div>
-</div>
-<div id="details">
-    <button class="close-btn">閉じる</button>
-    <h3>事件の詳細</h3>
-    <p>スライダーを動かして事件を選択してください。</p>
-    <p id="current-date"></p>
-</div>
+    <div id="timeline-bar">
+        <!-- 左側: ボタンエリア -->
+        <div id="button-area">
+            <button class="timeline-button">◀</button>
+            <button class="timeline-button">⬅</button>
+            <button class="timeline-button">⏪</button>
+            <button class="timeline-button">⏩</button>
+            <button class="timeline-button">➡</button>
+            <button class="timeline-button">▶</button>
+        </div>
+        <!-- 右側: ボーダーエリア -->
+        <div id="border-area">
+            <input type="range" id="slider" min="0" value="0">
+            <div id="date-window">06月1944年</div> 
+        </div>
+    </div>
 
-<script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZ2dwbGF5ZXIiLCJhIjoiY200OXBzcmI1MGR6bzJxcTFrdDJ1MGJyNSJ9.o_VpEScSsAPdt8U8PDB58Q';
-    const map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        projection: 'globe',
-        zoom: 2,
-        center: [130, 35]
-    });
+    <div id="details">
+        <button class="close-btn">閉じる</button>
+        <h3>事件の詳細</h3>
+        <p>スライダーを動かして事件を選択してください。</p>
+    </div>
 
-    map.addControl(new mapboxgl.NavigationControl());
-    map.on('style.load', () => {
-        map.setFog({});
-    });
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZ2dwbGF5ZXIiLCJhIjoiY200OXBzcmI1MGR6bzJxcTFrdDJ1MGJyNSJ9.o_VpEScSsAPdt8U8PDB58Q';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            projection: 'globe',
+            zoom: 2,
+            center: [130, 35]
+        });
 
-    const detailsContainer = document.getElementById('details');
-    const slider = document.getElementById('slider');
-    const sliderLabels = document.getElementById('slider-labels');
-    const currentDateElement = document.getElementById('current-date');
-    let currentMarker = null;
+        map.addControl(new mapboxgl.NavigationControl());
+        map.on('style.load', () => {
+            map.setFog({});
+        });
 
-    // CSVデータを読み込む
-    Papa.parse('https://gist.githubusercontent.com/Nakatani-Kenta/e3c184628d793e7e98c508743e4a6c53/raw/598b51541a11e6cee25a17c9c377e2f685193221/map.csv', {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-            const events = results.data;
+        const detailsContainer = document.getElementById('details');
+        const slider = document.getElementById('slider');
+        const dateWindow = document.getElementById('date-window');
+        let currentMarker = null;
 
-            slider.max = events.length - 1;
-            sliderLabels.innerHTML = events.map(e => `${e.year}年 ${e.month}`).join(" ");
+        // CSVデータを読み込む
+        Papa.parse('map.csv', {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                const events = results.data;
 
-            slider.addEventListener('input', () => {
-                const index = parseInt(slider.value);
-                const event = events[index];
+                slider.max = events.length - 1;
 
-                // 緯度経度を数値に変換
-                const latitude = parseFloat(event.latitude);
-                const longitude = parseFloat(event.longitude);
+                slider.addEventListener('input', () => {
+                    const index = parseInt(slider.value);
+                    const event = events[index];
 
-                // 緯度経度が有効かどうかチェック
-                if (isNaN(longitude) || isNaN(latitude)) {
-                    console.error(`無効な緯度経度: (${event.longitude}, ${event.latitude})`);
-                    return; // 無効な場合は処理をスキップ
-                }
+                    // 緯度経度を数値に変換
+                    const latitude = parseFloat(event.latitude);
+                    const longitude = parseFloat(event.longitude);
 
-                // 地図移動とマーカー更新
-                map.flyTo({
-                    center: [longitude, latitude],
-                    zoom: 10,
-                    offset: [-window.innerWidth * 0.13, 0]
+                    // 緯度経度が有効かどうかチェック
+                    if (isNaN(longitude) || isNaN(latitude)) {
+                        console.error(`無効な緯度経度: (${event.longitude}, ${event.latitude})`);
+                        return; // 無効な場合は処理をスキップ
+                    }
+
+                    // 地図移動とマーカー更新
+                    map.flyTo({
+                        center: [longitude, latitude],
+                        zoom: 10,
+                        offset: [-window.innerWidth * 0.13, 0]
+                    });
+
+                    if (currentMarker) {
+                        currentMarker.remove();
+                    }
+
+                    currentMarker = new mapboxgl.Marker({ color: 'red' })
+                        .setLngLat([longitude, latitude])
+                        .addTo(map);
+
+                    // 詳細ウィンドウ更新
+                    detailsContainer.style.display = 'block';
+                    detailsContainer.innerHTML = `
+                        <button class="close-btn">閉じる</button>
+                        <img src="${event.imageUrl}" alt="${event.title}">
+                        <h3>${event.title}</h3>
+                        <p>${event.description}</p>
+                        <p><strong>時代背景:</strong> ${event.context}</p>
+                    `;
+                    // スクロール位置をリセット
+                    detailsContainer.scrollTop = 0;
+
+                    // 日付ウィンドウの更新 (MM月YYYY年形式)
+                    const formattedDate = `${event.month}月${event.year}年`;
+                    dateWindow.textContent = formattedDate;
                 });
 
-                if (currentMarker) {
-                    currentMarker.remove();
-                }
-
-                currentMarker = new mapboxgl.Marker({ color: 'red' })
-                    .setLngLat([longitude, latitude])
-                    .addTo(map);
-
-                // 詳細ウィンドウ更新
-                detailsContainer.style.display = 'block';
-                detailsContainer.innerHTML = `
-                    <button class="close-btn">閉じる</button>
-                    <img src="${event.imageUrl}" alt="${event.title}">
-                    <h3>${event.title}</h3>
-                    <p>${event.description}</p>
-                    <p><strong>時代背景:</strong> ${event.context}</p>
-                `;
-
-                currentDateElement.textContent = `${event.month} ${event.year}`;
-                detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
-                    detailsContainer.style.display = 'none';
-                });
-            });
-
-            // 初期表示
-            slider.dispatchEvent(new Event('input'));
-        }
-    });
-</script>
+                // 初期表示
+                slider.dispatchEvent(new Event('input'));
+            }
+        });
+    </script>
 </body>
 </html>
-
