@@ -6,7 +6,6 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -31,7 +30,7 @@
             background: rgba(44, 44, 44, 0.9);
             box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
             display: none;
-            overflow-y: auto; /* 縦方向スクロールを有効化 */
+            overflow-y: auto;
         }
         #details h3 {
             margin-top: 0;
@@ -45,14 +44,12 @@
             border-radius: 5px;
             margin-bottom: 10px;
         }
-
         #details img {
             width: 80%;
             margin: 10px auto;
             display: block;
             border-radius: 5px;
         }
-        /* タイムラインバー全体 */
         #timeline-bar {
             position: absolute;
             bottom: 20px;
@@ -96,23 +93,20 @@
             height: 40px;
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 50%; /* 丸いボタン */
+            border-radius: 50%;
             color: white;
             font-size: 20px;
             cursor: pointer;
             transition: background 0.3s, transform 0.2s;
             margin: 0 5px;
-
         }
-
         .timeline-button:hover {
             background: rgba(255, 255, 255, 0.5);
-            transform: scale(1.1); /* マウスオーバーで拡大 */
+            transform: scale(1.1);
         }
-
         .timeline-button:active {
             background: rgba(255, 255, 255, 0.8);
-            transform: scale(0.9); /* クリック時に縮小 */
+            transform: scale(0.9);
         }
     </style>
 </head>
@@ -120,7 +114,6 @@
     <div id="map"></div>
 
     <div id="timeline-bar">
-        <!-- 左側: ボタンエリア -->
         <div id="button-area">
             <button class="timeline-button">◀</button>
             <button class="timeline-button">⬅</button>
@@ -129,10 +122,9 @@
             <button class="timeline-button">➡</button>
             <button class="timeline-button">▶</button>
         </div>
-        <!-- 右側: ボーダーエリア -->
         <div id="border-area">
             <input type="range" id="slider" min="0" value="0">
-            <div id="date-window">06月1944年</div> 
+            <div id="date-window">06月1944年</div>
         </div>
     </div>
 
@@ -157,70 +149,83 @@
             map.setFog({});
         });
 
+        const sheetNames = ['kentamap'];
+        const spreadsheetId = '1AZgfYRfWLtVXH7rx7BeEPmbmdy7EfnGDbAwi6bMSNsU';
+        const apiKey = 'AIzaSyAj_tQf-bp0v3j6Pl8S7HQVO5I-D5WI0GQ';
         const detailsContainer = document.getElementById('details');
         const slider = document.getElementById('slider');
         const dateWindow = document.getElementById('date-window');
         let currentMarker = null;
 
-        // CSVデータを読み込む
-        Papa.parse('map.csv', {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                const events = results.data;
-
-                slider.max = events.length - 1;
-
-                slider.addEventListener('input', () => {
-                    const index = parseInt(slider.value);
-                    const event = events[index];
-
-                    // 緯度経度を数値に変換
-                    const latitude = parseFloat(event.latitude);
-                    const longitude = parseFloat(event.longitude);
-
-                    // 緯度経度が有効かどうかチェック
-                    if (isNaN(longitude) || isNaN(latitude)) {
-                        console.error(`無効な緯度経度: (${event.longitude}, ${event.latitude})`);
-                        return; // 無効な場合は処理をスキップ
-                    }
-
-                    // 地図移動とマーカー更新
-                    map.flyTo({
-                        center: [longitude, latitude],
-                        zoom: 10,
-                        offset: [-window.innerWidth * 0.13, 0]
+        async function fetchData(sheetName) {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                const data = await response.json();
+                console.log(data);
+                const rows = data.values;
+                const headers = rows.shift(); // ヘッダー行を取得して削除
+                return rows.map(row => {
+                    const event = {};
+                    headers.forEach((header, index) => {
+                        event[header] = row[index];
                     });
+                    return event;
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return [];
+            }
+        }
 
-                    if (currentMarker) {
-                        currentMarker.remove();
-                    }
+        fetchData(sheetNames[0]).then(events => {
+            slider.max = events.length - 1;
 
-                    currentMarker = new mapboxgl.Marker({ color: 'red' })
-                        .setLngLat([longitude, latitude])
-                        .addTo(map);
+            slider.addEventListener('input', () => {
+                const index = parseInt(slider.value);
+                const event = events[index];
 
-                    // 詳細ウィンドウ更新
-                    detailsContainer.style.display = 'block';
-                    detailsContainer.innerHTML = `
-                        <button class="close-btn">閉じる</button>
-                        <img src="${event.imageUrl}" alt="${event.title}">
-                        <h3>${event.title}</h3>
-                        <p>${event.description}</p>
-                        <p><strong>時代背景:</strong> ${event.context}</p>
-                    `;
-                    // スクロール位置をリセット
-                    detailsContainer.scrollTop = 0;
+                const latitude = parseFloat(event.latitude);
+                const longitude = parseFloat(event.longitude);
 
-                    // 日付ウィンドウの更新 (MM月YYYY年形式)
-                    const formattedDate = `${event.month}月${event.year}年`;
-                    dateWindow.textContent = formattedDate;
+                if (isNaN(longitude) || isNaN(latitude)) {
+                    console.error(`無効な緯度経度: (${event.longitude}, ${event.latitude})`);
+                    return;
+                }
+
+                map.flyTo({
+                    center: [longitude, latitude],
+                    zoom: 10
                 });
 
-                // 初期表示
-                slider.dispatchEvent(new Event('input'));
-            }
+                if (currentMarker) {
+                    currentMarker.remove();
+                }
+
+                currentMarker = new mapboxgl.Marker({ color: 'red' })
+                    .setLngLat([longitude, latitude])
+                    .addTo(map);
+
+                detailsContainer.style.display = 'block';
+                detailsContainer.innerHTML = `
+                    <button class="close-btn">閉じる</button>
+                    <h3>${event.title}</h3>
+                    <img src="${event.imageUrl}" alt="${event.title}">
+                    <p>${event.description}</p>
+                `;
+
+                detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
+                    detailsContainer.style.display = 'none';
+                });
+
+                const formattedDate = `${event.month}月${event.year}年`;
+                dateWindow.textContent = formattedDate;
+            });
+
+            slider.dispatchEvent(new Event('input'));
         });
     </script>
 </body>
