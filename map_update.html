@@ -52,10 +52,10 @@
         }
         #timeline-bar {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80%;
+            width: 100%; /* 横幅を80%から90%に変更 */
             height: 50px;
             background: rgba(0, 0, 0, 0.5);
             border-radius: 50px;
@@ -107,6 +107,11 @@
         .timeline-button:active {
             background: rgba(255, 255, 255, 0.8);
             transform: scale(0.9);
+        }
+
+        #slider {
+            width: 80%; /* スライダーの幅を80%に設定 */
+            margin: 0 auto; /* スライダーを中央揃え */
         }
     </style>
 </head>
