@@ -120,8 +120,8 @@
 
     <div id="timeline-bar">
         <div id="button-area">
-            <button class="timeline-button">◀</button>
-            <button class="timeline-button">⬅</button>
+            <button id="allies-button" class="timeline-button">🌍</button> <!-- 連合国側 -->
+            <button id="axis-button" class="timeline-button">⚔️</button> <!-- 枢軸側 -->
             <button class="timeline-button">⏪</button>
             <button class="timeline-button">⏩</button>
             <button class="timeline-button">➡</button>
@@ -231,6 +231,54 @@
             });
 
             slider.dispatchEvent(new Event('input'));
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const alliesButton = document.getElementById('allies-button');
+            const axisButton = document.getElementById('axis-button');
+
+            // 連合国側ボタンのクリックイベント
+            alliesButton.addEventListener('click', function () {
+                const alliesTable = `
+                    <h3>連合国側の参加国</h3>
+                    <ul>
+                        <li>アメリカ</li>
+                        <li>イギリス</li>
+                        <li>ソ連</li>
+                        <li>中国</li>
+                        <li>フランス</li>
+                    </ul>
+                `;
+                showDetails(alliesTable);
+            });
+
+            // 枢軸側ボタンのクリックイベント
+            axisButton.addEventListener('click', function () {
+                const axisTable = `
+                    <h3>枢軸側の参加国</h3>
+                    <ul>
+                        <li>ドイツ</li>
+                        <li>日本</li>
+                        <li>イタリア</li>
+                        <li>ハンガリー</li>
+                        <li>ルーマニア</li>
+                    </ul>
+                `;
+                showDetails(axisTable);
+            });
+
+            // 詳細を表示する関数
+            function showDetails(content) {
+                const detailsContainer = document.getElementById('details');
+                detailsContainer.style.display = 'block';
+                detailsContainer.innerHTML = `
+                    <button class="close-btn">閉じる</button>
+                    ${content}
+                `;
+                detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
+                    detailsContainer.style.display = 'none';
+                });
+            }
         });
     </script>
 </body>
