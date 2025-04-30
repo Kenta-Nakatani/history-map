@@ -50,6 +50,18 @@
             display: block;
             border-radius: 5px;
         }
+        #details ul li a {
+            color: deepskyblue; /* テキストを水色に設定 */
+            text-decoration: underline; /* 下線を追加 */
+            background-color: transparent; /* 背景を透明に設定 */
+            padding: 0; /* 余白を削除 */
+            border-radius: 0; /* 角を丸くしない */
+        }
+
+        #details ul li a:hover {
+            color: dodgerblue; /* ホバー時に濃い水色に変更 */
+        }
+
         #timeline-bar {
             position: absolute;
             bottom: 30px;
@@ -162,6 +174,28 @@
         const dateWindow = document.getElementById('date-window');
         let currentMarker = null;
 
+        const countryCoordinates = {
+            "アメリカ合衆国": { lat: 37.0902, lng: -95.7129 },
+            "イギリス連邦": { lat: 55.3781, lng: -3.4360 },
+            "ソビエト連邦": { lat: 61.5240, lng: 105.3188 },
+            "中華民国": { lat: 35.8617, lng: 104.1954 },
+            "フランス共和国": { lat: 46.6034, lng: 1.8883 },
+            "カナダ": { lat: 56.1304, lng: -106.3468 },
+            "オーストラリア": { lat: -25.2744, lng: 133.7751 },
+            "ニュージーランド": { lat: -40.9006, lng: 174.8860 },
+            "インド": { lat: 20.5937, lng: 78.9629 },
+            "南アフリカ": { lat: -30.5595, lng: 22.9375 },
+            "ドイツ国": { lat: 51.1657, lng: 10.4515 },
+            "イタリア王国": { lat: 41.8719, lng: 12.5674 },
+            "大日本帝国": { lat: 36.2048, lng: 138.2529 },
+            "ハンガリー王国": { lat: 47.1625, lng: 19.5033 },
+            "ルーマニア王国": { lat: 45.9432, lng: 24.9668 },
+            "フィンランド": { lat: 61.9241, lng: 25.7482 },
+            "ブルガリア王国": { lat: 42.7339, lng: 25.4858 },
+            "タイ": { lat: 15.8700, lng: 100.9925 },
+            "ユーゴスラビア王国": { lat: 44.0165, lng: 21.0059 }
+        };
+
         async function fetchData(sheetName) {
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}`;
             try {
@@ -241,12 +275,13 @@
             alliesButton.addEventListener('click', function () {
                 const alliesTable = `
                     <h3>連合国側の参加国</h3>
+                    <h4>主要国</h4>
                     <ul>
-                        <li>アメリカ</li>
-                        <li>イギリス</li>
-                        <li>ソ連</li>
-                        <li>中国</li>
-                        <li>フランス</li>
+                        ${createCountryList(["アメリカ合衆国", "イギリス連邦", "ソビエト連邦", "中華民国", "フランス共和国"])}
+                    </ul>
+                    <h4>その他の国</h4>
+                    <ul>
+                        ${createCountryList(["カナダ", "オーストラリア", "ニュージーランド", "インド", "南アフリカ"])}
                     </ul>
                 `;
                 showDetails(alliesTable);
@@ -256,12 +291,13 @@
             axisButton.addEventListener('click', function () {
                 const axisTable = `
                     <h3>枢軸側の参加国</h3>
+                    <h4>主要国</h4>
                     <ul>
-                        <li>ドイツ</li>
-                        <li>日本</li>
-                        <li>イタリア</li>
-                        <li>ハンガリー</li>
-                        <li>ルーマニア</li>
+                        ${createCountryList(["ドイツ国", "イタリア王国", "大日本帝国"])}
+                    </ul>
+                    <h4>その他の国</h4>
+                    <ul>
+                        ${createCountryList(["ハンガリー王国", "ルーマニア王国", "フィンランド", "ブルガリア王国", "タイ", "ユーゴスラビア王国"])}
                     </ul>
                 `;
                 showDetails(axisTable);
@@ -280,6 +316,52 @@
                 });
             }
         });
+
+        function createCountryList(countries) {
+            return countries.map(country => `
+                <li>
+                    <a href="#" onclick="flyToCountry('${country}')">${country}</a>
+                    <button onclick="window.open('${getWikipediaUrl(country)}', '_blank')" style="margin-left: 10px;">🔗</button>
+                </li>
+            `).join('');
+        }
+
+        function getWikipediaUrl(countryName) {
+            const wikipediaUrls = {
+                "アメリカ合衆国": "https://ja.wikipedia.org/wiki/アメリカ合衆国",
+                "イギリス連邦": "https://ja.wikipedia.org/wiki/イギリス",
+                "ソビエト連邦": "https://ja.wikipedia.org/wiki/ソビエト連邦",
+                "中華民国": "https://ja.wikipedia.org/wiki/中華民国_(1912–1949)",
+                "フランス共和国": "https://ja.wikipedia.org/wiki/フランス",
+                "カナダ": "https://ja.wikipedia.org/wiki/カナダ",
+                "オーストラリア": "https://ja.wikipedia.org/wiki/オーストラリア",
+                "ニュージーランド": "https://ja.wikipedia.org/wiki/ニュージーランド",
+                "インド": "https://ja.wikipedia.org/wiki/インド",
+                "南アフリカ": "https://ja.wikipedia.org/wiki/南アフリカ共和国",
+                "ドイツ国": "https://ja.wikipedia.org/wiki/ドイツ国",
+                "イタリア王国": "https://ja.wikipedia.org/wiki/イタリア王国",
+                "大日本帝国": "https://ja.wikipedia.org/wiki/大日本帝国",
+                "ハンガリー王国": "https://ja.wikipedia.org/wiki/ハンガリー王国",
+                "ルーマニア王国": "https://ja.wikipedia.org/wiki/ルーマニア王国",
+                "フィンランド": "https://ja.wikipedia.org/wiki/フィンランド",
+                "ブルガリア王国": "https://ja.wikipedia.org/wiki/ブルガリア王国",
+                "タイ": "https://ja.wikipedia.org/wiki/タイ王国",
+                "ユーゴスラビア王国": "https://ja.wikipedia.org/wiki/ユーゴスラビア王国"
+            };
+            return wikipediaUrls[countryName] || "#";
+        }
+
+        function flyToCountry(countryName) {
+            const coordinates = countryCoordinates[countryName];
+            if (coordinates) {
+                map.flyTo({
+                    center: [coordinates.lng, coordinates.lat],
+                    zoom: 5
+                });
+            } else {
+                console.error(`Coordinates not found for ${countryName}`);
+            }
+        }
     </script>
 </body>
 </html>
