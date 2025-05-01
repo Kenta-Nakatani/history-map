@@ -5,6 +5,7 @@
     <title>太平洋戦争の地図</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/4.1.3/css/flag-icons.min.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.js"></script>
     <style>
         body {
@@ -125,10 +126,107 @@
             width: 80%; /* スライダーの幅を80%に設定 */
             margin: 0 auto; /* スライダーを中央揃え */
         }
+
+        #menu {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            display: flex;
+            align-items: center; /* メニューボタンとロゴを縦方向に揃える */
+            gap: 10px; /* メニューボタンとロゴの間に余白を追加 */
+        }
+
+        #menu-button {
+            background-color: rgba(255, 255, 255, 0.8); /* 背景色を明るい白に設定 */
+            color: #2C2C2C; /* テキストを濃いグレーに設定 */
+            border: none;
+            width: 50px; /* 正方形の幅 */
+            height: 50px; /* 正方形の高さ */
+            border-radius: 10px; /* ボタンの角を丸くする */
+            font-size: 24px; /* 記号のサイズを調整 */
+            display: flex;
+            align-items: center; /* 記号を縦方向に中央揃え */
+            justify-content: center; /* 記号を横方向に中央揃え */
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        #menu-button:hover {
+            background-color: rgba(255, 255, 255, 1); /* ホバー時に背景色をさらに明るく */
+            transform: scale(1.1); /* ホバー時に少し拡大 */
+        }
+
+        #menu-content {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            background: rgba(44, 44, 44, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column; /* 縦に並べる */
+            gap: 10px; /* ボタン間の余白を追加 */
+        }
+
+        .menu-item {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 50px; /* 正方形の幅 */
+            height: 50px; /* 正方形の高さ */
+            border-radius: 10px; /* 角を少し丸める */
+            cursor: pointer;
+            display: flex;
+            align-items: center; /* アイコンを中央揃え */
+            justify-content: center; /* アイコンを中央揃え */
+            box-sizing: border-box; /* パディングを含めて幅を計算 */
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1); /* ホバー時に少し拡大 */
+        }
+
+        #japan-button .flag-icon,
+        #world-button {
+            font-size: 24px; /* アイコンのサイズを調整 */
+        }
+
+        #info-button i {
+            font-size: 24px; /* アイコンのサイズを調整 */
+            color: white; /* アイコンの色を白に設定 */
+        }
+
+        #logo {
+            height: 50px; /* 高さを50pxに設定 */
+            width: 150px; /* 横幅を150pxに設定 */
+            object-fit: contain; /* アスペクト比を維持しつつ横に伸ばす */
+            cursor: pointer; /* 必要に応じてクリック可能にする */
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
+
+    <div id="menu">
+        <button id="menu-button" class="timeline-button">☰</button>
+        <img id="logo" src="./logo.jpg" alt="ロゴ">
+        <div id="menu-content" style="display: none;">
+            <button id="japan-button" class="menu-item">
+                <span class="flag-icon flag-icon-jp"></span>
+            </button>
+            <button id="world-button" class="menu-item">🌍</button>
+            <button id="info-button" class="menu-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                </svg>
+            </button>
+        </div>
+    </div>
 
     <div id="timeline-bar">
         <div id="button-area">
@@ -314,6 +412,88 @@
                 detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
                     detailsContainer.style.display = 'none';
                 });
+            }
+
+            const menuButton = document.getElementById('menu-button');
+            const menuContent = document.getElementById('menu-content');
+            const japanButton = document.getElementById('japan-button');
+            const worldButton = document.getElementById('world-button');
+
+            // メニューボタンのクリックイベント
+            menuButton.addEventListener('click', function () {
+                menuContent.style.display = menuContent.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // 日本ボタンのクリックイベント
+            japanButton.addEventListener('click', function () {
+                filterEventsByType('日本');
+            });
+
+            // 世界史ボタンのクリックイベント
+            worldButton.addEventListener('click', function () {
+                filterEventsByType('世界史');
+            });
+
+            // インフォメーションボタンのクリックイベント
+            const infoButton = document.getElementById('info-button');
+            infoButton.addEventListener('click', function () {
+                alert('このアプリは太平洋戦争と世界史のイベントを表示する地図アプリです。');
+            });
+
+            // イベントをフィルタリングする関数
+            function filterEventsByType(type) {
+                fetchData(sheetNames[0]).then(events => {
+                    const filteredEvents = events.filter(event => event.type === type);
+                    displayEvents(filteredEvents);
+                });
+            }
+
+            // イベントを表示する関数
+            function displayEvents(events) {
+                slider.max = events.length - 1;
+
+                slider.addEventListener('input', () => {
+                    const index = parseInt(slider.value);
+                    const event = events[index];
+
+                    const latitude = parseFloat(event.latitude);
+                    const longitude = parseFloat(event.longitude);
+
+                    if (isNaN(longitude) || isNaN(latitude)) {
+                        console.error(`無効な緯度経度: (${event.longitude}, ${event.latitude})`);
+                        return;
+                    }
+
+                    map.flyTo({
+                        center: [longitude, latitude],
+                        zoom: 10
+                    });
+
+                    if (currentMarker) {
+                        currentMarker.remove();
+                    }
+
+                    currentMarker = new mapboxgl.Marker({ color: 'red' })
+                        .setLngLat([longitude, latitude])
+                        .addTo(map);
+
+                    detailsContainer.style.display = 'block';
+                    detailsContainer.innerHTML = `
+                        <button class="close-btn">閉じる</button>
+                        <h3>${event.title}</h3>
+                        <img src="${event.imageUrl}" alt="${event.title}">
+                        <p>${event.description}</p>
+                    `;
+
+                    detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
+                        detailsContainer.style.display = 'none';
+                    });
+
+                    const formattedDate = `${event.month}月${event.year}年`;
+                    dateWindow.textContent = formattedDate;
+                });
+
+                slider.dispatchEvent(new Event('input'));
             }
         });
 
