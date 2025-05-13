@@ -333,9 +333,16 @@
                     return;
                 }
 
+                // ランダムな回転角度を生成（0〜360度）
+                const randomBearing = Math.floor(Math.random() * 360);
+
                 map.flyTo({
                     center: [longitude, latitude],
-                    zoom: 10
+                    zoom: 10,
+                    bearing: randomBearing, // ランダムな回転角度
+                    pitch: 45, // 視点を45度傾ける
+                    speed: 1.2, // アニメーション速度
+                    curve: 1.5 // アニメーションの滑らかさ
                 });
 
                 if (currentMarker) {
@@ -466,7 +473,11 @@
 
                     map.flyTo({
                         center: [longitude, latitude],
-                        zoom: 10
+                        zoom: 10,
+                        bearing: 45, // 地図を45度回転
+                        pitch: 45, // 視点を45度傾ける
+                        speed: 1.2, // アニメーション速度
+                        curve: 1.5 // アニメーションの滑らかさ
                     });
 
                     if (currentMarker) {
