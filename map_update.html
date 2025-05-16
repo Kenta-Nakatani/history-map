@@ -407,21 +407,6 @@
             }
         }
 
-        // スマートフォンかどうかを判定する関数
-        function isMobile() {
-            return window.innerWidth <= 768;
-        }
-
-        // 地図の中心位置を調整する関数
-        function adjustMapCenter(latitude, longitude) {
-            if (isMobile()) {
-                // スマートフォンの場合、画面の上から1/3の位置に中心を配置
-                const offset = 0.8; // 緯度のオフセット（約88km）
-                return [longitude, latitude + offset];
-            }
-            return [longitude, latitude];
-        }
-
         fetchData(sheetNames[0]).then(events => {
             slider.max = events.length - 1;
 
@@ -437,35 +422,27 @@
                     return;
                 }
 
-                // 地図の中心位置を調整
-                const [adjustedLongitude, adjustedLatitude] = adjustMapCenter(latitude, longitude);
+                // ランダムな回転角度を生成（0〜360度）
+                const randomBearing = Math.floor(Math.random() * 360);
 
                 map.flyTo({
-                    center: [adjustedLongitude, adjustedLatitude],
-                    zoom: isMobile() ? 8 : 10, // スマートフォンではより広い範囲を表示
-                    bearing: 0, // 回転を固定
-                    pitch: 0, // 傾きを0度に固定
-                    speed: 1.2,
-                    curve: 1.5
+                    center: [longitude, latitude],
+                    zoom: 10,
+                    bearing: randomBearing, // ランダムな回転角度
+                    pitch: 45, // 視点を45度傾ける
+                    speed: 1.2, // アニメーション速度
+                    curve: 1.5 // アニメーションの滑らかさ
                 });
 
                 if (currentMarker) {
                     currentMarker.remove();
                 }
 
-                // マーカーは実際の位置に配置
-                currentMarker = new mapboxgl.Marker({ 
-                    color: 'red',
-                    scale: isMobile() ? 1.2 : 1 // スマートフォンではマーカーを少し大きく
-                })
+                currentMarker = new mapboxgl.Marker({ color: 'red' })
                     .setLngLat([longitude, latitude])
                     .addTo(map);
 
-                // スマートフォンの場合、詳細パネルを自動的に表示
-                if (isMobile()) {
-                    detailsContainer.style.display = 'block';
-                }
-
+                detailsContainer.style.display = 'block';
                 detailsContainer.innerHTML = `
                     <button class="close-btn">閉じる</button>
                     <h3>${event.title}</h3>
@@ -480,16 +457,6 @@
                 const formattedDate = `${event.month}月${event.year}年`;
                 dateWindow.textContent = formattedDate;
             });
-
-            // スマートフォンでのタッチ操作を改善
-            if (isMobile()) {
-                // 地図のドラッグ操作を制限
-                map.dragRotate.disable();
-                map.touchZoomRotate.disableRotation();
-                
-                // ダブルタップでのズームを無効化
-                map.doubleClickZoom.disable();
-            }
 
             slider.dispatchEvent(new Event('input'));
         });
