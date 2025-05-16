@@ -206,6 +206,93 @@
             object-fit: contain; /* アスペクト比を維持しつつ横に伸ばす */
             cursor: pointer; /* 必要に応じてクリック可能にする */
         }
+
+        /* スマートフォン向けのスタイル */
+        @media screen and (max-width: 768px) {
+            #details {
+                width: 100%;
+                height: 50vh;
+                bottom: 0;
+                top: auto;
+                right: 0;
+                left: 0;
+                border-radius: 20px 20px 0 0;
+                padding: 15px;
+            }
+
+            #timeline-bar {
+                bottom: 10px;
+                width: 95%;
+                height: 40px;
+            }
+
+            .timeline-button {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+                margin: 0 3px;
+            }
+
+            #menu {
+                top: 5px;
+                left: 5px;
+            }
+
+            #menu-button {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            #logo {
+                height: 40px;
+                width: 120px;
+            }
+
+            #menu-content {
+                top: 45px;
+            }
+
+            .menu-item {
+                width: 40px;
+                height: 40px;
+            }
+
+            #details img {
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            #details h3 {
+                font-size: 1.2em;
+                margin: 10px 0;
+            }
+
+            #details p {
+                font-size: 0.9em;
+                margin: 8px 0;
+            }
+
+            #slider {
+                width: 70%;
+            }
+
+            #date-window {
+                font-size: 14px;
+            }
+        }
+
+        /* タブレット向けのスタイル */
+        @media screen and (min-width: 769px) and (max-width: 1024px) {
+            #details {
+                width: 35%;
+            }
+
+            .timeline-button {
+                width: 38px;
+                height: 38px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -232,10 +319,10 @@
         <div id="button-area">
             <button id="allies-button" class="timeline-button">🌍</button> <!-- 連合国側 -->
             <button id="axis-button" class="timeline-button">⚔️</button> <!-- 枢軸側 -->
-            <button class="timeline-button">⏪</button>
-            <button class="timeline-button">⏩</button>
-            <button class="timeline-button">➡</button>
-            <button class="timeline-button">▶</button>
+            <button id="first-button" class="timeline-button">⏪</button> <!-- 最初に戻る -->
+            <button id="last-button" class="timeline-button">⏩</button> <!-- 最後に進む -->
+            <button id="play-button" class="timeline-button">▶</button> <!-- 再生/一時停止 -->
+            <button id="stop-button" class="timeline-button">⏹</button> <!-- 停止 -->
         </div>
         <div id="border-area">
             <input type="range" id="slider" min="0" value="0">
@@ -271,6 +358,8 @@
         const slider = document.getElementById('slider');
         const dateWindow = document.getElementById('date-window');
         let currentMarker = null;
+        let isPlaying = false;
+        let playInterval = null;
 
         const countryCoordinates = {
             "アメリカ合衆国": { lat: 37.0902, lng: -95.7129 },
@@ -553,6 +642,65 @@
                 console.error(`Coordinates not found for ${countryName}`);
             }
         }
+
+        // 再生機能の追加
+        function startPlayback() {
+            if (isPlaying) return;
+            isPlaying = true;
+
+            // 最初のイベントの場合は即座に次のイベントに進む
+            if (parseInt(slider.value) === 0) {
+                slider.value = 1;
+                slider.dispatchEvent(new Event('input'));
+            }
+
+            playInterval = setInterval(() => {
+                const currentValue = parseInt(slider.value);
+                if (currentValue < parseInt(slider.max)) {
+                    slider.value = currentValue + 1;
+                    slider.dispatchEvent(new Event('input'));
+                } else {
+                    stopPlayback();
+                }
+            }, 6000); // 5秒ごとに次のイベントに進む
+        }
+
+        function stopPlayback() {
+            if (!isPlaying) return;
+            isPlaying = false;
+            clearInterval(playInterval);
+            playInterval = null;
+            document.getElementById('play-button').textContent = '▶';
+        }
+
+        // 再生ボタンのイベントリスナーを追加
+        document.getElementById('play-button').addEventListener('click', function() {
+            if (isPlaying) {
+                stopPlayback();
+            } else {
+                startPlayback();
+                this.textContent = '⏸';
+            }
+        });
+
+        // 停止ボタンのイベントリスナーを追加
+        document.getElementById('stop-button').addEventListener('click', () => {
+            stopPlayback();
+        });
+
+        // 最初のイベントに戻るボタンのイベントリスナーを追加
+        document.getElementById('first-button').addEventListener('click', () => {
+            stopPlayback();
+            slider.value = 0;
+            slider.dispatchEvent(new Event('input'));
+        });
+
+        // 最後のイベントに進むボタンのイベントリスナーを追加
+        document.getElementById('last-button').addEventListener('click', () => {
+            stopPlayback();
+            slider.value = slider.max;
+            slider.dispatchEvent(new Event('input'));
+        });
     </script>
 </body>
 </html>
