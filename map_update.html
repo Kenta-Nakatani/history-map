@@ -407,6 +407,21 @@
             }
         }
 
+        // スマートフォンかどうかを判定する関数
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+
+        // 地図の中心位置を調整する関数
+        function adjustMapCenter(latitude, longitude) {
+            if (isMobile()) {
+                // スマートフォンの場合、中心位置を上にずらす
+                const offset = 0.5; // 緯度のオフセット（約55km）
+                return [longitude, latitude + offset];
+            }
+            return [longitude, latitude];
+        }
+
         fetchData(sheetNames[0]).then(events => {
             slider.max = events.length - 1;
 
@@ -425,19 +440,23 @@
                 // ランダムな回転角度を生成（0〜360度）
                 const randomBearing = Math.floor(Math.random() * 360);
 
+                // 地図の中心位置を調整
+                const [adjustedLongitude, adjustedLatitude] = adjustMapCenter(latitude, longitude);
+
                 map.flyTo({
-                    center: [longitude, latitude],
+                    center: [adjustedLongitude, adjustedLatitude],
                     zoom: 10,
-                    bearing: randomBearing, // ランダムな回転角度
-                    pitch: 45, // 視点を45度傾ける
-                    speed: 1.2, // アニメーション速度
-                    curve: 1.5 // アニメーションの滑らかさ
+                    bearing: randomBearing,
+                    pitch: 45,
+                    speed: 1.2,
+                    curve: 1.5
                 });
 
                 if (currentMarker) {
                     currentMarker.remove();
                 }
 
+                // マーカーは実際の位置に配置
                 currentMarker = new mapboxgl.Marker({ color: 'red' })
                     .setLngLat([longitude, latitude])
                     .addTo(map);
@@ -456,6 +475,20 @@
 
                 const formattedDate = `${event.month}月${event.year}年`;
                 dateWindow.textContent = formattedDate;
+            });
+
+            // ウィンドウのリサイズ時に地図の中心位置を再調整
+            window.addEventListener('resize', () => {
+                const currentEvent = events[parseInt(slider.value)];
+                if (currentEvent) {
+                    const latitude = parseFloat(currentEvent.latitude);
+                    const longitude = parseFloat(currentEvent.longitude);
+                    const [adjustedLongitude, adjustedLatitude] = adjustMapCenter(latitude, longitude);
+                    map.flyTo({
+                        center: [adjustedLongitude, adjustedLatitude],
+                        zoom: 10
+                    });
+                }
             });
 
             slider.dispatchEvent(new Event('input'));
