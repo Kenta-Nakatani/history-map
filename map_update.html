@@ -415,8 +415,8 @@
         // 地図の中心位置を調整する関数
         function adjustMapCenter(latitude, longitude) {
             if (isMobile()) {
-                // スマートフォンの場合、中心位置を上にずらす
-                const offset = 0.5; // 緯度のオフセット（約55km）
+                // スマートフォンの場合、画面の上から1/4の位置に中心を配置
+                const offset = 1.0; // 緯度のオフセット（約110km）
                 return [longitude, latitude + offset];
             }
             return [longitude, latitude];
@@ -445,7 +445,7 @@
 
                 map.flyTo({
                     center: [adjustedLongitude, adjustedLatitude],
-                    zoom: 10,
+                    zoom: isMobile() ? 9 : 10, // スマートフォンの場合は少しズームアウト
                     bearing: randomBearing,
                     pitch: 45,
                     speed: 1.2,
@@ -460,6 +460,11 @@
                 currentMarker = new mapboxgl.Marker({ color: 'red' })
                     .setLngLat([longitude, latitude])
                     .addTo(map);
+
+                // スマートフォンの場合、マーカーを少し大きく表示
+                if (isMobile()) {
+                    currentMarker.getElement().style.transform = 'scale(1.5)';
+                }
 
                 detailsContainer.style.display = 'block';
                 detailsContainer.innerHTML = `
