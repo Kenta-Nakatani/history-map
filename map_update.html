@@ -438,16 +438,16 @@
                 }
 
                 // ランダムな回転角度を生成（0〜360度）
-                const randomBearing = Math.floor(Math.random() * 360);
+                const randomBearing = isMobile() ? 0 : Math.floor(Math.random() * 360);
 
                 // 地図の中心位置を調整
                 const [adjustedLongitude, adjustedLatitude] = adjustMapCenter(latitude, longitude);
 
                 map.flyTo({
                     center: [adjustedLongitude, adjustedLatitude],
-                    zoom: isMobile() ? 9 : 10, // スマートフォンの場合は少しズームアウト
+                    zoom: isMobile() ? 9 : 10,
                     bearing: randomBearing,
-                    pitch: 45,
+                    pitch: isMobile() ? 0 : 45, // スマートフォンの場合は傾きも0度に
                     speed: 1.2,
                     curve: 1.5
                 });
