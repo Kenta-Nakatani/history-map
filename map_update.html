@@ -166,33 +166,103 @@
             border-radius: 5px;
             padding: 10px;
             display: flex;
-            flex-direction: column; /* 縦に並べる */
-            gap: 10px; /* ボタン間の余白を追加 */
+            flex-direction: column;
+            gap: 10px;
+            min-width: 50px;
         }
 
-        .menu-item {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+        #events-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: rgba(44, 44, 44, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 2000;
+            display: none;
+            overflow-y: auto;
+        }
+
+        #events-panel.visible {
+            display: block;
+        }
+
+        #events-panel h2 {
+            color: #fff;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #search-box {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
             border: none;
-            width: 50px; /* 正方形の幅 */
-            height: 50px; /* 正方形の高さ */
-            border-radius: 10px; /* 角を少し丸める */
-            cursor: pointer;
-            display: flex;
-            align-items: center; /* アイコンを中央揃え */
-            justify-content: center; /* アイコンを中央揃え */
-            box-sizing: border-box; /* パディングを含めて幅を計算 */
-            transition: background 0.3s, transform 0.2s;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            box-sizing: border-box;
         }
 
-        .menu-item:hover {
-            background: rgba(255, 255, 255, 0.5);
-            transform: scale(1.1); /* ホバー時に少し拡大 */
+        .event-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .event-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .event-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .event-date {
+            font-size: 0.9em;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .event-title {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        #close-events {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
         }
 
         #japan-button .flag-icon,
-        #world-button {
-            font-size: 24px; /* アイコンのサイズを調整 */
+        #world-button,
+        #events-button,
+        #info-button svg {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            line-height: 1;
         }
 
         #info-button i {
@@ -256,6 +326,7 @@
             .menu-item {
                 width: 40px;
                 height: 40px;
+                font-size: 20px;
             }
 
             #details img {
@@ -280,6 +351,24 @@
             #date-window {
                 font-size: 14px;
             }
+
+            #events-panel {
+                width: 95%;
+                max-height: 90vh;
+            }
+
+            #japan-button .flag-icon,
+            #world-button,
+            #events-button,
+            #info-button svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            #world-button,
+            #events-button {
+                font-size: 20px;
+            }
         }
 
         /* タブレット向けのスタイル */
@@ -293,6 +382,61 @@
                 height: 38px;
             }
         }
+
+        .menu-item {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            transition: background 0.3s, transform 0.2s;
+            font-size: 24px;
+            padding: 0;
+            margin: 0;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        #world-button,
+        #events-button {
+            font-size: 24px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+
+        #world-button::before,
+        #events-button::before {
+            content: '';
+            display: block;
+            padding-top: 100%;
+        }
+
+        #world-button span,
+        #events-button span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            line-height: 1;
+        }
     </style>
 </head>
 <body>
@@ -305,7 +449,12 @@
             <button id="japan-button" class="menu-item">
                 <span class="flag-icon flag-icon-jp"></span>
             </button>
-            <button id="world-button" class="menu-item">🌍</button>
+            <button id="world-button" class="menu-item">
+                <span>🌍</span>
+            </button>
+            <button id="events-button" class="menu-item">
+                <span>📅</span>
+            </button>
             <button id="info-button" class="menu-item">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
                     <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
@@ -328,6 +477,13 @@
             <input type="range" id="slider" min="0" value="0">
             <div id="date-window">06月1944年</div>
         </div>
+    </div>
+
+    <div id="events-panel">
+        <button id="close-events">×</button>
+        <h2>イベント一覧</h2>
+        <input type="text" id="search-box" placeholder="イベントを検索...">
+        <ul class="event-list" id="event-list"></ul>
     </div>
 
     <div id="details">
@@ -514,87 +670,104 @@
             const menuContent = document.getElementById('menu-content');
             const japanButton = document.getElementById('japan-button');
             const worldButton = document.getElementById('world-button');
+            const eventsButton = document.getElementById('events-button');
+            const eventsPanel = document.getElementById('events-panel');
+            const closeEvents = document.getElementById('close-events');
 
             // メニューボタンのクリックイベント
             menuButton.addEventListener('click', function () {
                 menuContent.style.display = menuContent.style.display === 'none' ? 'block' : 'none';
             });
 
-            // 日本ボタンのクリックイベント
-            japanButton.addEventListener('click', function () {
-                filterEventsByType('日本');
+            // イベント一覧ボタンのクリックイベント
+            eventsButton.addEventListener('click', function() {
+                eventsPanel.classList.add('visible');
+                menuContent.style.display = 'none';
             });
 
-            // 世界史ボタンのクリックイベント
-            worldButton.addEventListener('click', function () {
-                filterEventsByType('世界史');
+            // イベント一覧を閉じるボタンのクリックイベント
+            closeEvents.addEventListener('click', function() {
+                eventsPanel.classList.remove('visible');
             });
 
-            // インフォメーションボタンのクリックイベント
-            const infoButton = document.getElementById('info-button');
-            infoButton.addEventListener('click', function () {
-                alert('このアプリは太平洋戦争と世界史のイベントを表示する地図アプリです。');
+            // イベント一覧の外側をクリックしたら閉じる
+            eventsPanel.addEventListener('click', function(e) {
+                if (e.target === eventsPanel) {
+                    eventsPanel.classList.remove('visible');
+                }
             });
 
-            // イベントをフィルタリングする関数
-            function filterEventsByType(type) {
-                fetchData(sheetNames[0]).then(events => {
-                    const filteredEvents = events.filter(event => event.type === type);
-                    displayEvents(filteredEvents);
-                });
-            }
-
-            // イベントを表示する関数
-            function displayEvents(events) {
-                slider.max = events.length - 1;
-
-                slider.addEventListener('input', () => {
-                    const index = parseInt(slider.value);
-                    const event = events[index];
-
-                    const latitude = parseFloat(event.latitude);
-                    const longitude = parseFloat(event.longitude);
-
-                    if (isNaN(longitude) || isNaN(latitude)) {
-                        console.error(`無効な緯度経度: (${event.longitude}, ${event.latitude})`);
-                        return;
-                    }
-
-                    map.flyTo({
-                        center: [longitude, latitude],
-                        zoom: 10,
-                        bearing: 45, // 地図を45度回転
-                        pitch: 45, // 視点を45度傾ける
-                        speed: 1.2, // アニメーション速度
-                        curve: 1.5 // アニメーションの滑らかさ
-                    });
-
-                    if (currentMarker) {
-                        currentMarker.remove();
-                    }
-
-                    currentMarker = new mapboxgl.Marker({ color: 'red' })
-                        .setLngLat([longitude, latitude])
-                        .addTo(map);
-
-                    detailsContainer.style.display = 'block';
-                    detailsContainer.innerHTML = `
-                        <button class="close-btn">閉じる</button>
-                        <h3>${event.title}</h3>
-                        <img src="${event.imageUrl}" alt="${event.title}">
-                        <p>${event.description}</p>
+            // イベント一覧の表示
+            fetchData(sheetNames[0]).then(events => {
+                const eventList = document.getElementById('event-list');
+                events.forEach((event, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'event-item';
+                    li.innerHTML = `
+                        <div class="event-date">${event.year}年${event.month}月</div>
+                        <div class="event-title">${event.title}</div>
                     `;
+                    li.addEventListener('click', () => {
+                        const latitude = parseFloat(event.latitude);
+                        const longitude = parseFloat(event.longitude);
 
-                    detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
-                        detailsContainer.style.display = 'none';
+                        if (isNaN(longitude) || isNaN(latitude)) {
+                            console.error(`無効な緯度経度: (${event.longitude}, ${event.latitude})`);
+                            return;
+                        }
+
+                        map.flyTo({
+                            center: [longitude, latitude],
+                            zoom: 10,
+                            bearing: 45,
+                            pitch: 45,
+                            speed: 1.2,
+                            curve: 1.5
+                        });
+
+                        if (currentMarker) {
+                            currentMarker.remove();
+                        }
+
+                        currentMarker = new mapboxgl.Marker({ color: 'red' })
+                            .setLngLat([longitude, latitude])
+                            .addTo(map);
+
+                        detailsContainer.style.display = 'block';
+                        detailsContainer.innerHTML = `
+                            <button class="close-btn">閉じる</button>
+                            <h3>${event.title}</h3>
+                            <img src="${event.imageUrl}" alt="${event.title}">
+                            <p>${event.description}</p>
+                        `;
+
+                        detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
+                            detailsContainer.style.display = 'none';
+                        });
+
+                        eventsPanel.classList.remove('visible');
                     });
-
-                    const formattedDate = `${event.month}月${event.year}年`;
-                    dateWindow.textContent = formattedDate;
+                    eventList.appendChild(li);
                 });
 
-                slider.dispatchEvent(new Event('input'));
-            }
+                // 検索機能の実装
+                const searchBox = document.getElementById('search-box');
+                searchBox.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const eventItems = document.querySelectorAll('.event-item');
+                    
+                    eventItems.forEach(item => {
+                        const title = item.querySelector('.event-title').textContent.toLowerCase();
+                        const date = item.querySelector('.event-date').textContent.toLowerCase();
+                        
+                        if (title.includes(searchTerm) || date.includes(searchTerm)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
         });
 
         function createCountryList(countries) {
