@@ -17,9 +17,67 @@
             background-color: #2C2C2C;
             color: #D3D3D3;
         }
+        #welcome-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            max-height: 70vh;
+            background: rgba(44, 44, 44, 0.95);
+            border-radius: 10px;
+            padding: 30px;
+            z-index: 3000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+        }
+        #welcome-popup h2 {
+            color: #fff;
+            margin-top: 0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #welcome-popup h3 {
+            color: #fff;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        #welcome-popup p {
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        #welcome-popup ul {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+        #welcome-popup li {
+            margin: 10px 0;
+        }
+        #open-map-button {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            padding: 15px 30px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            z-index: 3001;
+        }
+        #open-map-button:hover {
+            background: #45a049;
+            transform: translateX(-50%) scale(1.05);
+        }
         #map {
             flex: 1;
             width: 100%;
+            display: none;
         }
         #details {
             width: 25%;
@@ -437,9 +495,171 @@
             transform: translate(-50%, -50%);
             line-height: 1;
         }
+
+        .countries-container {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        .country-section {
+            flex: 1;
+            min-width: 0;
+        }
+        .country-section h4 {
+            color: #fff;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .country-section h5 {
+            color: #ddd;
+            margin: 15px 0 10px 0;
+        }
+        .country-section ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .country-section li {
+            margin: 8px 0;
+        }
+        .countries-popup {
+            width: 50% !important;
+        }
+        #wikipedia-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            max-width: 800px;
+            height: 80vh;
+            background: rgba(44, 44, 44, 0.95);
+            border-radius: 10px;
+            padding: 30px;
+            z-index: 3000;
+            display: none;
+            overflow-y: auto;
+        }
+        #wikipedia-popup iframe {
+            width: 100%;
+            height: calc(100% - 60px);
+            border: none;
+            border-radius: 5px;
+            margin-top: 40px;
+        }
+        #wikipedia-popup .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 5px;
+            width: 60px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+            z-index: 3001;
+        }
+        #wikipedia-popup .close-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2999;
+            display: none;
+        }
+        #info-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: rgba(44, 44, 44, 0.95);
+            border-radius: 10px;
+            padding: 30px;
+            z-index: 3000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: none;
+            overflow-y: auto;
+        }
+        #info-popup h2 {
+            color: #fff;
+            margin-top: 0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #info-popup h3 {
+            color: #fff;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        #info-popup p {
+            color: #ddd;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+        #info-popup .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 5px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        #info-popup .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 <body>
+    <div id="welcome-popup">
+        <h2>太平洋戦争の地図へようこそ</h2>
+        <h3>基本的な使い方</h3>
+        <ul>
+            <li>下部のスライダーを動かして時系列を移動</li>
+            <li>▶再生ボタンで自動再生、⏹で停止</li>
+            <li>各出来事の位置にマーカーが表示され、詳細情報が右側に表示</li>
+        </ul>
+
+        <h3>便利な機能</h3>
+        <ul>
+            <li>☰ 左上のメニューから：
+                <ul>
+                    <li><span class="flag-icon flag-icon-jp"></span> 日本地図の表示</li>
+                    <li>🌍 世界地図の表示</li>
+                    <li>🔍 出来事の検索</li>
+                    <li>ℹ️ 情報の表示</li>
+                </ul>
+            </li>
+            <li>⚔️ 下部のボタンで参加国の一覧を確認</li>
+            <li>🔍 検索ボタンで出来事を検索・表示</li>
+        </ul>
+    </div>
+    <button id="open-map-button">地図を開く</button>
+
     <div id="map"></div>
 
     <div id="menu">
@@ -453,7 +673,7 @@
                 <span>🌍</span>
             </button>
             <button id="events-button" class="menu-item">
-                <span>📅</span>
+                <span>🔍</span>
             </button>
             <button id="info-button" class="menu-item">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
@@ -466,8 +686,7 @@
 
     <div id="timeline-bar">
         <div id="button-area">
-            <button id="allies-button" class="timeline-button">🌍</button> <!-- 連合国側 -->
-            <button id="axis-button" class="timeline-button">⚔️</button> <!-- 枢軸側 -->
+            <button id="countries-button" class="timeline-button">⚔️</button> <!-- 統合された参加国ボタン -->
             <button id="first-button" class="timeline-button">⏪</button> <!-- 最初に戻る -->
             <button id="last-button" class="timeline-button">⏩</button> <!-- 最後に進む -->
             <button id="play-button" class="timeline-button">▶</button> <!-- 再生/一時停止 -->
@@ -490,6 +709,36 @@
         <button class="close-btn">閉じる</button>
         <h3>事件の詳細</h3>
         <p>スライダーを動かして事件を選択してください。</p>
+    </div>
+
+    <div id="wikipedia-popup">
+        <button class="close-btn">×</button>
+        <iframe id="wikipedia-frame" src="about:blank"></iframe>
+    </div>
+    <div class="overlay"></div>
+
+    <div id="info-popup">
+        <button class="close-btn">×</button>
+        <h2>このサイトについて</h2>
+        
+        <h3>制作目的</h3>
+        <p>このサイトは、太平洋戦争の歴史を時系列で追跡し、視覚的に理解することを目的として制作されました。地図上で出来事を確認することで、戦争の展開をより直感的に把握することができます。</p>
+
+        <h3>制作者</h3>
+        <p>麗澤大学工学部情報システム専攻2年 中谷健太</p>
+
+        <h3>使用技術</h3>
+        <p>・Mapbox GL JS - インタラクティブな地図表示<br>
+        ・Google Sheets API - データ管理<br>
+        ・HTML5/CSS3/JavaScript - フロントエンド開発</p>
+
+        <h3>クレジット</h3>
+        <p>・ロゴ：CanvaのAI生成<br>
+        ・地図データ：Mapbox<br>
+        ・国情報：Wikipedia</p>
+
+        <h3>お問い合わせ</h3>
+        <p>ご意見・ご要望がございましたら、お気軽にお問い合わせください。</p>
     </div>
 
     <script>
@@ -603,7 +852,7 @@
                     <button class="close-btn">閉じる</button>
                     <h3>${event.title}</h3>
                     <img src="${event.imageUrl}" alt="${event.title}">
-                    <p>${event.description}</p>
+                    <p style="margin-top: 20px;">${event.description}</p>
                 `;
 
                 detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
@@ -613,50 +862,107 @@
                 const formattedDate = `${event.month}月${event.year}年`;
                 dateWindow.textContent = formattedDate;
             });
-
-            slider.dispatchEvent(new Event('input'));
         });
 
         document.addEventListener('DOMContentLoaded', function () {
-            const alliesButton = document.getElementById('allies-button');
-            const axisButton = document.getElementById('axis-button');
+            const welcomePopup = document.getElementById('welcome-popup');
+            const mapContainer = document.getElementById('map');
+            const openMapButton = document.getElementById('open-map-button');
 
-            // 連合国側ボタンのクリックイベント
-            alliesButton.addEventListener('click', function () {
-                const alliesTable = `
-                    <h3>連合国側の参加国</h3>
-                    <h4>主要国</h4>
-                    <ul>
-                        ${createCountryList(["アメリカ合衆国", "イギリス連邦", "ソビエト連邦", "中華民国", "フランス共和国"])}
-                    </ul>
-                    <h4>その他の国</h4>
-                    <ul>
-                        ${createCountryList(["カナダ", "オーストラリア", "ニュージーランド", "インド", "南アフリカ"])}
-                    </ul>
-                `;
-                showDetails(alliesTable);
+            openMapButton.addEventListener('click', function() {
+                welcomePopup.style.display = 'none';
+                mapContainer.style.display = 'block';
+                this.style.display = 'none'; // ボタンを非表示
+                map.resize(); // マップのサイズを再調整
+
+                // 最初のイベントに移動
+                fetchData(sheetNames[0]).then(events => {
+                    if (events.length > 0) {
+                        const firstEvent = events[0];
+                        const latitude = parseFloat(firstEvent.latitude);
+                        const longitude = parseFloat(firstEvent.longitude);
+
+                        if (!isNaN(longitude) && !isNaN(latitude)) {
+                            map.flyTo({
+                                center: [longitude, latitude],
+                                zoom: 10,
+                                bearing: 45,
+                                pitch: 45,
+                                speed: 1.2,
+                                curve: 1.5
+                            });
+
+                            if (currentMarker) {
+                                currentMarker.remove();
+                            }
+
+                            currentMarker = new mapboxgl.Marker({ color: 'red' })
+                                .setLngLat([longitude, latitude])
+                                .addTo(map);
+
+                            detailsContainer.style.display = 'block';
+                            detailsContainer.innerHTML = `
+                                <button class="close-btn">閉じる</button>
+                                <h3>${firstEvent.title}</h3>
+                                <img src="${firstEvent.imageUrl}" alt="${firstEvent.title}">
+                                <p style="margin-top: 20px;">${firstEvent.description}</p>
+                            `;
+
+                            detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
+                                detailsContainer.style.display = 'none';
+                            });
+
+                            // スライダーと日付表示を更新
+                            slider.value = 0;
+                            dateWindow.textContent = `${firstEvent.month}月${firstEvent.year}年`;
+                        }
+                    }
+                });
             });
 
-            // 枢軸側ボタンのクリックイベント
-            axisButton.addEventListener('click', function () {
-                const axisTable = `
-                    <h3>枢軸側の参加国</h3>
-                    <h4>主要国</h4>
-                    <ul>
-                        ${createCountryList(["ドイツ国", "イタリア王国", "大日本帝国"])}
-                    </ul>
-                    <h4>その他の国</h4>
-                    <ul>
-                        ${createCountryList(["ハンガリー王国", "ルーマニア王国", "フィンランド", "ブルガリア王国", "タイ", "ユーゴスラビア王国"])}
-                    </ul>
+            const countriesButton = document.getElementById('countries-button');
+
+            // 統合された参加国ボタンのクリックイベント
+            countriesButton.addEventListener('click', function () {
+                const countriesTable = `
+                    <h3>太平洋戦争の参加国</h3>
+                    <div class="countries-container">
+                        <div class="country-section">
+                            <h4>連合国側</h4>
+                            <h5>主要国</h5>
+                            <ul>
+                                ${createCountryList(["アメリカ合衆国", "イギリス連邦", "ソビエト連邦", "中華民国", "フランス共和国"])}
+                            </ul>
+                            <h5>その他の国</h5>
+                            <ul>
+                                ${createCountryList(["カナダ", "オーストラリア", "ニュージーランド", "インド", "南アフリカ"])}
+                            </ul>
+                        </div>
+                        <div class="country-section">
+                            <h4>枢軸側</h4>
+                            <h5>主要国</h5>
+                            <ul>
+                                ${createCountryList(["ドイツ国", "イタリア王国", "大日本帝国"])}
+                            </ul>
+                            <h5>その他の国</h5>
+                            <ul>
+                                ${createCountryList(["ハンガリー王国", "ルーマニア王国", "フィンランド", "ブルガリア王国", "タイ", "ユーゴスラビア王国"])}
+                            </ul>
+                        </div>
+                    </div>
                 `;
-                showDetails(axisTable);
+                showDetails(countriesTable, true);
             });
 
             // 詳細を表示する関数
-            function showDetails(content) {
+            function showDetails(content, isCountries = false) {
                 const detailsContainer = document.getElementById('details');
                 detailsContainer.style.display = 'block';
+                if (isCountries) {
+                    detailsContainer.classList.add('countries-popup');
+                } else {
+                    detailsContainer.classList.remove('countries-popup');
+                }
                 detailsContainer.innerHTML = `
                     <button class="close-btn">閉じる</button>
                     ${content}
@@ -698,7 +1004,7 @@
             });
 
             // イベント一覧の表示
-            fetchData(sheetNames[0]).then(events => {
+                fetchData(sheetNames[0]).then(events => {
                 const eventList = document.getElementById('event-list');
                 events.forEach((event, index) => {
                     const li = document.createElement('li');
@@ -708,42 +1014,42 @@
                         <div class="event-title">${event.title}</div>
                     `;
                     li.addEventListener('click', () => {
-                        const latitude = parseFloat(event.latitude);
-                        const longitude = parseFloat(event.longitude);
+                    const latitude = parseFloat(event.latitude);
+                    const longitude = parseFloat(event.longitude);
 
-                        if (isNaN(longitude) || isNaN(latitude)) {
-                            console.error(`無効な緯度経度: (${event.longitude}, ${event.latitude})`);
-                            return;
-                        }
+                    if (isNaN(longitude) || isNaN(latitude)) {
+                        console.error(`無効な緯度経度: (${event.longitude}, ${event.latitude})`);
+                        return;
+                    }
 
-                        map.flyTo({
-                            center: [longitude, latitude],
-                            zoom: 10,
+                    map.flyTo({
+                        center: [longitude, latitude],
+                        zoom: 10,
                             bearing: 45,
                             pitch: 45,
                             speed: 1.2,
                             curve: 1.5
-                        });
+                    });
 
-                        if (currentMarker) {
-                            currentMarker.remove();
-                        }
+                    if (currentMarker) {
+                        currentMarker.remove();
+                    }
 
-                        currentMarker = new mapboxgl.Marker({ color: 'red' })
-                            .setLngLat([longitude, latitude])
-                            .addTo(map);
+                    currentMarker = new mapboxgl.Marker({ color: 'red' })
+                        .setLngLat([longitude, latitude])
+                        .addTo(map);
 
-                        detailsContainer.style.display = 'block';
-                        detailsContainer.innerHTML = `
-                            <button class="close-btn">閉じる</button>
-                            <h3>${event.title}</h3>
-                            <img src="${event.imageUrl}" alt="${event.title}">
-                            <p>${event.description}</p>
-                        `;
+                    detailsContainer.style.display = 'block';
+                    detailsContainer.innerHTML = `
+                        <button class="close-btn">閉じる</button>
+                        <h3>${event.title}</h3>
+                        <img src="${event.imageUrl}" alt="${event.title}">
+                        <p style="margin-top: 20px;">${event.description}</p>
+                    `;
 
-                        detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
-                            detailsContainer.style.display = 'none';
-                        });
+                    detailsContainer.querySelector('.close-btn').addEventListener('click', () => {
+                        detailsContainer.style.display = 'none';
+                    });
 
                         eventsPanel.classList.remove('visible');
                     });
@@ -768,18 +1074,39 @@
                     });
                 });
             });
+
+            const infoButton = document.getElementById('info-button');
+            const infoPopup = document.getElementById('info-popup');
+            const closeInfoBtn = infoPopup.querySelector('.close-btn');
+
+            // 情報ボタンのクリックイベント
+            infoButton.addEventListener('click', function() {
+                infoPopup.style.display = 'block';
+                menuContent.style.display = 'none';
+            });
+
+            // 情報ポップアップを閉じる
+            closeInfoBtn.addEventListener('click', function() {
+                infoPopup.style.display = 'none';
+            });
+
+            // 情報ポップアップの外側をクリックしたら閉じる
+            infoPopup.addEventListener('click', function(e) {
+                if (e.target === infoPopup) {
+                    infoPopup.style.display = 'none';
+                }
+            });
         });
 
         function createCountryList(countries) {
             return countries.map(country => `
                 <li>
-                    <a href="#" onclick="flyToCountry('${country}')">${country}</a>
-                    <button onclick="window.open('${getWikipediaUrl(country)}', '_blank')" style="margin-left: 10px;">🔗</button>
+                    <a href="#" onclick="showWikipedia('${country}'); return false;">${country}</a>
                 </li>
             `).join('');
         }
 
-        function getWikipediaUrl(countryName) {
+        function showWikipedia(countryName) {
             const wikipediaUrls = {
                 "アメリカ合衆国": "https://ja.wikipedia.org/wiki/アメリカ合衆国",
                 "イギリス連邦": "https://ja.wikipedia.org/wiki/イギリス",
@@ -801,18 +1128,31 @@
                 "タイ": "https://ja.wikipedia.org/wiki/タイ王国",
                 "ユーゴスラビア王国": "https://ja.wikipedia.org/wiki/ユーゴスラビア王国"
             };
-            return wikipediaUrls[countryName] || "#";
-        }
 
-        function flyToCountry(countryName) {
-            const coordinates = countryCoordinates[countryName];
-            if (coordinates) {
-                map.flyTo({
-                    center: [coordinates.lng, coordinates.lat],
-                    zoom: 5
-                });
-            } else {
-                console.error(`Coordinates not found for ${countryName}`);
+            const url = wikipediaUrls[countryName];
+            if (url) {
+                const popup = document.getElementById('wikipedia-popup');
+                const overlay = document.querySelector('.overlay');
+                const iframe = document.getElementById('wikipedia-frame');
+                
+                iframe.src = url;
+                popup.style.display = 'block';
+                overlay.style.display = 'block';
+
+                // 閉じるボタンのイベントリスナー
+                const closeBtn = popup.querySelector('.close-btn');
+                closeBtn.onclick = function() {
+                    popup.style.display = 'none';
+                    overlay.style.display = 'none';
+                    iframe.src = 'about:blank';
+                };
+
+                // オーバーレイクリックで閉じる
+                overlay.onclick = function() {
+                    popup.style.display = 'none';
+                    overlay.style.display = 'none';
+                    iframe.src = 'about:blank';
+                };
             }
         }
 
