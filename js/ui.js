@@ -1,25 +1,49 @@
 // 再生状態を保持する変数
 let isPlaying = false;
 let playInterval = null;
+let currentEventIndex = 0;
+
+// 陣営色の状態を管理
+let showFactionColors = false;
+
+// 次のイベントに移動する関数
+function moveToNextEvent() {
+    if (currentEventIndex < events.length - 1) {
+        currentEventIndex++;
+        const startDate = eventToDate(events[0]);
+        const endDate = eventToDate(events[events.length - 1]);
+        const eventDate = eventToDate(events[currentEventIndex]);
+        const newValue = normalizeDate(eventDate, startDate, endDate);
+        
+        const slider = document.getElementById('slider');
+        slider.value = newValue;
+        showEvent(currentEventIndex);
+    }
+}
+
+// 前のイベントに移動する関数
+function moveToPreviousEvent() {
+    if (currentEventIndex > 0) {
+        currentEventIndex--;
+        const startDate = eventToDate(events[0]);
+        const endDate = eventToDate(events[events.length - 1]);
+        const eventDate = eventToDate(events[currentEventIndex]);
+        const newValue = normalizeDate(eventDate, startDate, endDate);
+        
+        const slider = document.getElementById('slider');
+        slider.value = newValue;
+        showEvent(currentEventIndex);
+    }
+}
 
 // 再生を開始する関数
 function startPlayback() {
     if (isPlaying) return;
     isPlaying = true;
 
-    // 最初のイベントの場合は即座に次のイベントに進む
-    const slider = document.getElementById('slider');
-    if (parseInt(slider.value) === 0) {
-        slider.value = 1;
-        slider.dispatchEvent(new Event('input'));
-    }
-
     playInterval = setInterval(() => {
-        const currentValue = parseInt(slider.value);
-        if (currentValue < parseInt(slider.max)) {
-            slider.value = currentValue + 1;
-            slider.dispatchEvent(new Event('input'));
-        } else {
+        moveToNextEvent();
+        if (currentEventIndex >= events.length - 1) {
             stopPlayback();
         }
     }, 6000);
@@ -112,12 +136,80 @@ function showDetails(content, isCountries = false) {
     });
 }
 
+// 陣営色の表示/非表示を切り替える関数
+function toggleFactionColors() {
+    showFactionColors = !showFactionColors;
+    const factionButton = document.getElementById('faction-button');
+    
+    // ボタンのアクティブ状態を切り替え
+    if (showFactionColors) {
+        factionButton.classList.add('active');
+    } else {
+        factionButton.classList.remove('active');
+    }
+    
+    // レイヤーの表示/非表示を切り替え
+    if (map.getLayer('allied-countries')) {
+        map.setLayoutProperty('allied-countries', 'visibility', showFactionColors ? 'visible' : 'none');
+    }
+    if (map.getLayer('axis-countries')) {
+        map.setLayoutProperty('axis-countries', 'visibility', showFactionColors ? 'visible' : 'none');
+    }
+    if (map.getLayer('country-borders')) {
+        map.setLayoutProperty('country-borders', 'visibility', showFactionColors ? 'visible' : 'none');
+    }
+}
+
 // イベントリスナーを設定する関数
 function setupEventListeners() {
     // スライダーのイベントリスナー
     const slider = document.getElementById('slider');
+    let isDragging = false;
+    let dragStartValue = 0;
+
+    slider.addEventListener('mousedown', () => {
+        isDragging = true;
+        dragStartValue = parseInt(slider.value);
+    });
+
+    slider.addEventListener('mouseup', () => {
+        isDragging = false;
+        const nearestIndex = findNearestEventIndex(parseInt(slider.value));
+        if (nearestIndex !== currentEventIndex) {
+            currentEventIndex = nearestIndex;
+            const startDate = eventToDate(events[0]);
+            const endDate = eventToDate(events[events.length - 1]);
+            const eventDate = eventToDate(events[currentEventIndex]);
+            const newValue = normalizeDate(eventDate, startDate, endDate);
+            slider.value = newValue;
+            showEvent(currentEventIndex);
+        } else {
+            slider.value = dragStartValue;
+        }
+    });
+
     slider.addEventListener('input', () => {
-        showEvent(parseInt(slider.value));
+        if (!isDragging) {
+            const nearestIndex = findNearestEventIndex(parseInt(slider.value));
+            if (nearestIndex !== currentEventIndex) {
+                currentEventIndex = nearestIndex;
+                const startDate = eventToDate(events[0]);
+                const endDate = eventToDate(events[events.length - 1]);
+                const eventDate = eventToDate(events[currentEventIndex]);
+                const newValue = normalizeDate(eventDate, startDate, endDate);
+                slider.value = newValue;
+                showEvent(currentEventIndex);
+            }
+        }
+    });
+
+    // キーボードイベントリスナー
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') {
+            moveToNextEvent();
+        } else if (e.key === 'ArrowLeft') {
+            moveToPreviousEvent();
+        }
     });
 
     // 再生ボタンのイベントリスナー
@@ -138,40 +230,49 @@ function setupEventListeners() {
     // 最初のイベントに戻るボタンのイベントリスナー
     document.getElementById('first-button').addEventListener('click', () => {
         stopPlayback();
+        currentEventIndex = 0;
         slider.value = 0;
-        slider.dispatchEvent(new Event('input'));
+        showEvent(0);
     });
 
     // 最後のイベントに進むボタンのイベントリスナー
     document.getElementById('last-button').addEventListener('click', () => {
         stopPlayback();
-        slider.value = slider.max;
-        slider.dispatchEvent(new Event('input'));
+        currentEventIndex = events.length - 1;
+        slider.value = 100;
+        showEvent(events.length - 1);
     });
 
     // メニューボタンのイベントリスナー
     const menuButton = document.getElementById('menu-button');
     const menuContent = document.getElementById('menu-content');
     menuButton.addEventListener('click', function() {
-        menuContent.style.display = menuContent.style.display === 'none' ? 'block' : 'none';
+        if (menuContent.style.display === 'none' || menuContent.style.display === '') {
+            menuContent.style.display = 'block';
+        }
+    });
+
+    // メニュー外をクリックしたときにメニューを閉じる
+    document.addEventListener('click', function(event) {
+        if (!menuButton.contains(event.target) && !menuContent.contains(event.target)) {
+            menuContent.style.display = 'none';
+        }
     });
 
     // 日本地図ボタンのイベントリスナー
     document.getElementById('japan-button').addEventListener('click', function() {
         flyToJapan();
-        menuContent.style.display = 'none';
     });
 
     // 世界地図ボタンのイベントリスナー
     document.getElementById('world-button').addEventListener('click', function() {
         flyToWorld();
-        menuContent.style.display = 'none';
     });
 
     // イベント一覧ボタンのイベントリスナー
     document.getElementById('events-button').addEventListener('click', function() {
         document.getElementById('events-panel').classList.add('visible');
-        menuContent.style.display = 'none';
+        updateEventList(); // イベント一覧を更新
     });
 
     // イベント一覧を閉じるボタンのイベントリスナー
@@ -188,8 +289,9 @@ function setupEventListeners() {
         eventItems.forEach(item => {
             const title = item.querySelector('.event-title').textContent.toLowerCase();
             const date = item.querySelector('.event-date').textContent.toLowerCase();
+            const description = item.getAttribute('data-description')?.toLowerCase() || '';
             
-            if (title.includes(searchTerm) || date.includes(searchTerm)) {
+            if (title.includes(searchTerm) || date.includes(searchTerm) || description.includes(searchTerm)) {
                 item.style.display = 'block';
             } else {
                 item.style.display = 'none';
@@ -202,7 +304,6 @@ function setupEventListeners() {
     const infoPopup = document.getElementById('info-popup');
     infoButton.addEventListener('click', function() {
         infoPopup.style.display = 'block';
-        menuContent.style.display = 'none';
     });
 
     // 情報ポップアップを閉じるボタンのイベントリスナー
@@ -249,5 +350,10 @@ function setupEventListeners() {
         this.style.display = 'none';
         map.resize();
         initializeData();
+    });
+
+    // 陣営色切り替えボタンのイベントリスナー
+    document.getElementById('faction-button').addEventListener('click', function() {
+        toggleFactionColors();
     });
 } 

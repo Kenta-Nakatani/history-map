@@ -90,10 +90,27 @@ body {
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
     display: none;
     overflow-y: auto;
+    z-index: 1000;
 }
 
 #details h3 {
     margin-top: 0;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+}
+
+#details p {
+    margin: 10px 0;
+    line-height: 1.5;
+    font-size: 0.9em;
+}
+
+#details img {
+    width: 100%;
+    max-width: 300px;
+    margin: 10px auto;
+    display: block;
+    border-radius: 5px;
 }
 
 #details .close-btn {
@@ -104,13 +121,6 @@ body {
     padding: 5px 10px;
     border-radius: 5px;
     margin-bottom: 10px;
-}
-
-#details img {
-    width: 80%;
-    margin: 10px auto;
-    display: block;
-    border-radius: 5px;
 }
 
 #details ul li a {
@@ -140,6 +150,97 @@ body {
     z-index: 10;
     backdrop-filter: blur(5px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+#timeline-container {
+    position: relative;
+    width: 80%;
+    height: 20px;
+    margin: 0 auto;
+}
+
+#timeline-events {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.event-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: red;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 3;
+}
+
+.event-dot:hover {
+    transform: translate(-50%, -50%) scale(1.5);
+    background-color: #ff4444;
+}
+
+.event-dot.grouped-event {
+    box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.3);
+}
+
+#slider {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    margin: 0;
+    -webkit-appearance: none;
+    background: transparent;
+    z-index: 2;
+    transform: translateY(-50%);
+    outline: none;
+}
+
+#slider:focus {
+    outline: none;
+}
+
+#slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: -6px;
+    outline: none;
+}
+
+#slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+#slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+}
+
+#slider::-moz-range-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
 }
 
 #button-area {
@@ -181,11 +282,6 @@ body {
 .timeline-button:active {
     background: rgba(255, 255, 255, 0.8);
     transform: scale(0.9);
-}
-
-#slider {
-    width: 80%;
-    margin: 0 auto;
 }
 
 #menu {
@@ -651,4 +747,71 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     line-height: 1;
+}
+
+#faction-button svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease;
+}
+
+#faction-button:hover svg {
+    transform: rotate(45deg);
+}
+
+#faction-button.active svg {
+    color: #4CAF50;
+}
+
+#faction-button.active:hover svg {
+    color: #f44336;
+}
+
+#year-toggle {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1100;
+    display: flex;
+    gap: 10px;
+}
+
+.year-btn {
+    background: #333;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 20px;
+    padding: 8px 24px;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s, transform 0.1s;
+    box-shadow: none;
+    font-weight: normal;
+}
+
+.year-btn.active {
+    background: linear-gradient(90deg, #2196f3 60%, #f44336 100%);
+    color: #fff;
+    border: 3px solid #ffd700;
+    font-weight: bold;
+    opacity: 1;
+    box-shadow: 0 0 12px 2px rgba(33,150,243,0.25), 0 2px 8px 0 rgba(244,67,54,0.15);
+    transform: scale(1.08);
+    z-index: 1;
+}
+
+.year-btn:active {
+    background: #222;
+    color: #fff;
+    transform: scale(0.96);
+    box-shadow: 0 0 4px 1px #000;
+}
+
+.year-btn.active:active {
+    background: linear-gradient(90deg, #1976d2 60%, #b71c1c 100%);
+    border-color: #ffa000;
+    box-shadow: 0 0 6px 2px #1976d2, 0 2px 8px 0 #b71c1c;
+    transform: scale(1.02);
 } 

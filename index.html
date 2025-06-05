@@ -23,14 +23,13 @@
         <ul>
             <li>☰ 左上のメニューから：
                 <ul>
-                    <li><span class="flag-icon flag-icon-jp"></span> 日本地図の表示</li>
-                    <li>🌍 世界地図の表示</li>
+                    <li><span class="flag-icon flag-icon-jp"></span> 日本史の表示</li>
+                    <li>🌍 世界史の表示</li>
                     <li>🔍 出来事の検索</li>
                     <li>ℹ️ 情報の表示</li>
                 </ul>
             </li>
             <li>⚔️ 下部のボタンで参加国の一覧を確認</li>
-            <li>🔍 検索ボタンで出来事を検索・表示</li>
         </ul>
     </div>
     <button id="open-map-button">地図を開く</button>
@@ -56,6 +55,9 @@
                     <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
                 </svg>
             </button>
+            <button id="faction-button" class="menu-item">
+                <span>⚔️</span>
+            </button>
         </div>
     </div>
 
@@ -68,7 +70,10 @@
             <button id="stop-button" class="timeline-button">⏹</button>
         </div>
         <div id="border-area">
+            <div id="timeline-container">
+                <div id="timeline-events"></div>
             <input type="range" id="slider" min="0" value="0">
+            </div>
             <div id="date-window">06月1944年</div>
         </div>
     </div>
@@ -114,6 +119,11 @@
 
         <h3>お問い合わせ</h3>
         <p>ご意見・ご要望がございましたら、お気軽にお問い合わせください。</p>
+    </div>
+
+    <div id="year-toggle">
+        <button id="btn-1938" class="year-btn active">1938年</button>
+        <button id="btn-1945" class="year-btn">1945年</button>
     </div>
 
     <script src="js/map.js"></script>

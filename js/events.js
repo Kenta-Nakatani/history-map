@@ -35,6 +35,107 @@ async function fetchData(sheetName) {
     }
 }
 
+// イベントを日付に変換する関数
+function eventToDate(event) {
+    const year = parseInt(event.year) || 0;
+    const month = parseInt(event.month) || 1;
+    const day = parseInt(event.day) || 1;
+    return new Date(year, month - 1, day);
+}
+
+// 日付を0-100の範囲に正規化する関数
+function normalizeDate(date, startDate, endDate) {
+    const totalDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
+    const daysFromStart = (date - startDate) / (1000 * 60 * 60 * 24);
+    return (daysFromStart / totalDays) * 100;
+}
+
+// イベントをグループ化する関数
+function groupEventsByDate(events) {
+    const groups = [];
+    let currentGroup = [];
+    const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000; // 90日をミリ秒に変換
+
+    events.forEach((event, index) => {
+        const eventDate = eventToDate(event);
+        
+        if (currentGroup.length === 0) {
+            currentGroup.push({ event, date: eventDate, index });
+        } else {
+            const firstDateInGroup = eventToDate(currentGroup[0].event);
+            if (Math.abs(eventDate - firstDateInGroup) <= THREE_MONTHS_MS) {
+                currentGroup.push({ event, date: eventDate, index });
+            } else {
+                groups.push(currentGroup);
+                currentGroup = [{ event, date: eventDate, index }];
+            }
+        }
+    });
+
+    if (currentGroup.length > 0) {
+        groups.push(currentGroup);
+    }
+
+    return groups;
+}
+
+// タイムラインのイベントドットを更新する関数
+function updateTimelineEvents() {
+    const timelineEvents = document.getElementById('timeline-events');
+    timelineEvents.innerHTML = '';
+
+    if (events.length === 0) return;
+
+    const startDate = eventToDate(events[0]);
+    const endDate = eventToDate(events[events.length - 1]);
+    const eventGroups = groupEventsByDate(events);
+
+    eventGroups.forEach(group => {
+        group.forEach(({ event, index }, groupIndex) => {
+            const date = eventToDate(event);
+            const position = normalizeDate(date, startDate, endDate);
+            
+            const dot = document.createElement('div');
+            dot.className = 'event-dot';
+            dot.style.left = `${position}%`;
+            
+            // グループ内の位置に応じて上下に分散
+            if (group.length > 1) {
+                const offset = (groupIndex - (group.length - 1) / 2) * 20; // 20pxずつ上下に分散
+                dot.style.top = `calc(50% + ${offset}px)`;
+            } else {
+                dot.style.top = '50%';
+            }
+            
+            // ツールチップを追加
+            dot.title = `${event.year}年${event.month}月${event.day || 1}日: ${event.title || 'タイトルなし'}`;
+            
+            timelineEvents.appendChild(dot);
+        });
+    });
+}
+
+// 最も近いイベントのインデックスを取得する関数
+function findNearestEventIndex(value) {
+    const startDate = eventToDate(events[0]);
+    const endDate = eventToDate(events[events.length - 1]);
+    const targetDate = new Date(startDate.getTime() + (endDate - startDate) * (value / 100));
+
+    let nearestIndex = 0;
+    let minDiff = Infinity;
+
+    events.forEach((event, index) => {
+        const eventDate = eventToDate(event);
+        const diff = Math.abs(eventDate - targetDate);
+        if (diff < minDiff) {
+            minDiff = diff;
+            nearestIndex = index;
+        }
+    });
+
+    return nearestIndex;
+}
+
 // データを初期化する関数
 async function initializeData() {
     try {
@@ -48,17 +149,17 @@ async function initializeData() {
 
         // イベントを年代順にソート
         events.sort((a, b) => {
-            const yearA = parseInt(a.year) || 0;
-            const yearB = parseInt(b.year) || 0;
-            if (yearA !== yearB) {
-                return yearA - yearB;
-            }
-            return (parseInt(a.month) || 0) - (parseInt(b.month) || 0);
+            const dateA = eventToDate(a);
+            const dateB = eventToDate(b);
+            return dateA - dateB;
         });
+
+        // タイムラインのイベントドットを更新
+        updateTimelineEvents();
 
         // スライダーの最大値を設定
         const slider = document.getElementById('slider');
-        slider.max = events.length - 1;
+        slider.max = 100;
 
         // 最初のイベントを表示
         showEvent(0);
@@ -107,6 +208,7 @@ function updateEventList() {
     events.forEach((event, index) => {
         const li = document.createElement('li');
         li.className = 'event-item';
+        li.setAttribute('data-description', event.description || '');
         li.innerHTML = `
             <div class="event-date">${event.year || '????'}年${event.month || '??'}月</div>
             <div class="event-title">${event.title || 'タイトルなし'}</div>
