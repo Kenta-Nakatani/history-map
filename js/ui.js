@@ -111,8 +111,31 @@ function showWikipedia(countryName) {
 
 // 参加国リストを作成する関数
 function createCountryList(countries) {
+    const countryFlags = {
+        "アメリカ合衆国": "flag-icon-us",
+        "イギリス連邦": "flag-icon-gb",
+        "ソビエト連邦": "flag-icon-ru",
+        "中華民国": "flag-icon-cn",
+        "フランス共和国": "flag-icon-fr",
+        "カナダ": "flag-icon-ca",
+        "オーストラリア": "flag-icon-au",
+        "ニュージーランド": "flag-icon-nz",
+        "インド": "flag-icon-in",
+        "南アフリカ": "flag-icon-za",
+        "ドイツ国": "flag-icon-de",
+        "イタリア王国": "flag-icon-it",
+        "大日本帝国": "flag-icon-jp",
+        "ハンガリー王国": "flag-icon-hu",
+        "ルーマニア王国": "flag-icon-ro",
+        "フィンランド": "flag-icon-fi",
+        "ブルガリア王国": "flag-icon-bg",
+        "タイ": "flag-icon-th",
+        "ユーゴスラビア王国": "flag-icon-rs"
+    };
+
     return countries.map(country => `
         <li>
+            <span class="flag-icon ${countryFlags[country]}"></span>
             <a href="#" onclick="showWikipedia('${country}'); return false;">${country}</a>
         </li>
     `).join('');
@@ -256,8 +279,79 @@ function setupEventListeners() {
     document.addEventListener('click', function(event) {
         if (!menuButton.contains(event.target) && !menuContent.contains(event.target)) {
             menuContent.style.display = 'none';
+            document.getElementById('year-submenu').style.display = 'none';
         }
     });
+
+    // 年代メニューボタンのイベントリスナー
+    const yearMenuButton = document.getElementById('year-menu-button');
+    const yearSubmenu = document.getElementById('year-submenu');
+    yearMenuButton.addEventListener('click', function(event) {
+        event.stopPropagation();
+        if (yearSubmenu.style.display === 'none' || yearSubmenu.style.display === '') {
+            yearSubmenu.style.display = 'block';
+        } else {
+            yearSubmenu.style.display = 'none';
+        }
+    });
+
+    // 年代ボタンのイベントリスナー
+    const btn1938 = document.getElementById('btn-1938');
+    const btn1945 = document.getElementById('btn-1945');
+    const btn2024 = document.getElementById('btn-2024');
+
+    function updateButtonStates(activeButton) {
+        [btn1938, btn1945, btn2024].forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.remove('inactive');
+        });
+        if (isMapVisible) {
+            activeButton.classList.add('active');
+        } else {
+            activeButton.classList.add('inactive');
+        }
+    }
+
+    if (btn1938 && btn1945 && btn2024) {
+        btn1938.addEventListener('click', () => {
+            if (currentYear === 1938) {
+                isMapVisible = !isMapVisible;
+                toggleMapVisibility();
+                updateButtonStates(btn1938);
+            } else {
+                currentYear = 1938;
+                isMapVisible = true;
+                updateButtonStates(btn1938);
+                loadBorders(1938);
+            }
+        });
+
+        btn1945.addEventListener('click', () => {
+            if (currentYear === 1945) {
+                isMapVisible = !isMapVisible;
+                toggleMapVisibility();
+                updateButtonStates(btn1945);
+            } else {
+                currentYear = 1945;
+                isMapVisible = true;
+                updateButtonStates(btn1945);
+                loadBorders(1945);
+            }
+        });
+
+        btn2024.addEventListener('click', () => {
+            if (currentYear === 2024) {
+                isMapVisible = !isMapVisible;
+                toggleMapVisibility();
+                updateButtonStates(btn2024);
+            } else {
+                currentYear = 2024;
+                isMapVisible = true;
+                updateButtonStates(btn2024);
+                loadBorders(2024);
+            }
+        });
+    }
 
     // 日本地図ボタンのイベントリスナー
     document.getElementById('japan-button').addEventListener('click', function() {
@@ -313,34 +407,31 @@ function setupEventListeners() {
 
     // 参加国ボタンのイベントリスナー
     document.getElementById('countries-button').addEventListener('click', function() {
-        const countriesTable = `
-            <h3>太平洋戦争の参加国</h3>
-            <div class="countries-container">
-                <div class="country-section">
-                    <h4>連合国側</h4>
-                    <h5>主要国</h5>
-                    <ul>
-                        ${createCountryList(["アメリカ合衆国", "イギリス連邦", "ソビエト連邦", "中華民国", "フランス共和国"])}
-                    </ul>
-                    <h5>その他の国</h5>
-                    <ul>
-                        ${createCountryList(["カナダ", "オーストラリア", "ニュージーランド", "インド", "南アフリカ"])}
-                    </ul>
-                </div>
-                <div class="country-section">
-                    <h4>枢軸側</h4>
-                    <h5>主要国</h5>
-                    <ul>
-                        ${createCountryList(["ドイツ国", "イタリア王国", "大日本帝国"])}
-                    </ul>
-                    <h5>その他の国</h5>
-                    <ul>
-                        ${createCountryList(["ハンガリー王国", "ルーマニア王国", "フィンランド", "ブルガリア王国", "タイ", "ユーゴスラビア王国"])}
-                    </ul>
-                </div>
-            </div>
-        `;
-        showDetails(countriesTable, true);
+        const countriesPopup = document.getElementById('countries-popup');
+        const overlay = document.querySelector('.overlay');
+        
+        // 国リストを更新
+        document.getElementById('allied-major').innerHTML = createCountryList(["アメリカ合衆国", "イギリス連邦", "ソビエト連邦", "中華民国", "フランス共和国"]);
+        document.getElementById('allied-others').innerHTML = createCountryList(["カナダ", "オーストラリア", "ニュージーランド", "インド", "南アフリカ"]);
+        document.getElementById('axis-major').innerHTML = createCountryList(["ドイツ国", "イタリア王国", "大日本帝国"]);
+        document.getElementById('axis-others').innerHTML = createCountryList(["ハンガリー王国", "ルーマニア王国", "フィンランド", "ブルガリア王国", "タイ", "ユーゴスラビア王国"]);
+        
+        // ポップアップを表示
+        countriesPopup.style.display = 'block';
+        overlay.style.display = 'block';
+
+        // 閉じるボタンのイベントリスナー
+        const closeBtn = countriesPopup.querySelector('.close-btn');
+        closeBtn.onclick = function() {
+            countriesPopup.style.display = 'none';
+            overlay.style.display = 'none';
+        };
+
+        // オーバーレイクリックで閉じる
+        overlay.onclick = function() {
+            countriesPopup.style.display = 'none';
+            overlay.style.display = 'none';
+        };
     });
 
     // 地図を開くボタンのイベントリスナー

@@ -58,6 +58,14 @@
             <button id="faction-button" class="menu-item">
                 <span>⚔️</span>
             </button>
+            <button id="year-menu-button" class="menu-item">
+                <span>📅</span>
+            </button>
+            <div id="year-submenu" class="submenu" style="display: none;">
+                <button id="btn-1938" class="year-btn active">1938年</button>
+                <button id="btn-1945" class="year-btn">1945年</button>
+                <button id="btn-2024" class="year-btn">現代</button>
+            </div>
         </div>
     </div>
 
@@ -121,9 +129,31 @@
         <p>ご意見・ご要望がございましたら、お気軽にお問い合わせください。</p>
     </div>
 
+    <div id="countries-popup">
+        <button class="close-btn">×</button>
+        <h2>太平洋戦争の参加国</h2>
+        <div class="countries-container">
+            <div class="country-section">
+                <h4>連合国側</h4>
+                <h5>主要国</h5>
+                <ul id="allied-major"></ul>
+                <h5>その他の国</h5>
+                <ul id="allied-others"></ul>
+            </div>
+            <div class="country-section">
+                <h4>枢軸側</h4>
+                <h5>主要国</h5>
+                <ul id="axis-major"></ul>
+                <h5>その他の国</h5>
+                <ul id="axis-others"></ul>
+            </div>
+        </div>
+    </div>
+
     <div id="year-toggle">
         <button id="btn-1938" class="year-btn active">1938年</button>
         <button id="btn-1945" class="year-btn">1945年</button>
+        <button id="btn-2024" class="year-btn">現代</button>
     </div>
 
     <script src="js/map.js"></script>

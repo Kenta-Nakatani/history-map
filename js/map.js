@@ -163,6 +163,7 @@ function flyToWorld() {
 } 
 
 let currentYear = 1938;
+let isMapVisible = true; // 地図の表示状態を管理する変数を追加
 
 function getCountryColor(name) {
     // 国名から一意の色を生成（ハッシュベースの簡易実装）
@@ -174,21 +175,36 @@ function getCountryColor(name) {
     return `hsl(${h}, 70%, 60%)`;
 }
 
-function getPolygonCenter(coords) {
-    // MultiPolygon or Polygon
-    let all = [];
-    if (Array.isArray(coords[0][0][0])) {
-        // MultiPolygon
-        coords.forEach(poly => {
-            all = all.concat(poly[0]);
-        });
-    } else {
-        // Polygon
-        all = coords[0];
+function getPolygonCenter(coordinates) {
+    if (!coordinates || !coordinates.length) return null;
+
+    let x = 0;
+    let y = 0;
+    let count = 0;
+
+    // 座標の配列を平坦化して処理
+    const flattenCoordinates = (coords) => {
+        if (Array.isArray(coords[0]) && Array.isArray(coords[0][0])) {
+            // ネストされた配列の場合、再帰的に処理
+            return coords.flatMap(flattenCoordinates);
+        }
+        return coords;
+    };
+
+    const flatCoords = flattenCoordinates(coordinates);
+
+    // すべての座標の平均を計算
+    for (let i = 0; i < flatCoords.length; i++) {
+        if (Array.isArray(flatCoords[i]) && flatCoords[i].length >= 2) {
+            x += flatCoords[i][0];
+            y += flatCoords[i][1];
+            count++;
+        }
     }
-    let x = 0, y = 0, n = all.length;
-    all.forEach(c => { x += c[0]; y += c[1]; });
-    return [x / n, y / n];
+
+    if (count === 0) return null;
+
+    return [x / count, y / count];
 }
 
 async function loadBorders(year) {
@@ -204,93 +220,125 @@ async function loadBorders(year) {
         map.removeSource('borders-labels');
     }
     // GeoJSONファイルのパス
-    const url = year === 1938 ? '1938WW2.geojson' : '1945WW2.geojson';
-    const response = await fetch(url);
-    const geojson = await response.json();
+    const url = year === 1938 ? '1938WW2.geojson' : 
+                year === 1945 ? '1945WW2.geojson' : 
+                '2024.geojson';
+    console.log('Loading borders for year:', year, 'from URL:', url);
+    
+    try {
+        const response = await fetch(url);
+        const geojson = await response.json();
+        console.log('Loaded GeoJSON:', geojson);
 
-    // 国ごとに色を割り当てるプロパティを追加
-    geojson.features.forEach(f => {
-        f.properties._fillColor = getCountryColor(f.properties.NAME || f.properties.ABBREVNAME || f.properties.FIPS_CODE || '');
-    });
-
-    // 国ごとに1つだけ中心点を作る
-    const labelMap = {};
-    geojson.features.forEach(f => {
-        const name = f.properties.NAME;
-        if (!labelMap[name]) {
-            // ポリゴンの中心を計算
-            let center = null;
-            if (f.geometry.type === 'Polygon') {
-                center = getPolygonCenter(f.geometry.coordinates);
-            } else if (f.geometry.type === 'MultiPolygon') {
-                center = getPolygonCenter(f.geometry.coordinates);
+        // 国ごとに色を割り当てるプロパティを追加
+        geojson.features.forEach(f => {
+            if (year === 2024) {
+                // 2024年のデータ用の特別な処理
+                const countryIdentifier = f.properties.ISO_A3_EH || f.properties.ISO_N3 || f.properties.NAME_JA || f.properties.NAME_EN || '';
+                f.properties._fillColor = getCountryColor(countryIdentifier);
+                // 日本語名をNAMEプロパティとして設定
+                f.properties.NAME = f.properties.NAME_JA || f.properties.NAME_EN || '';
+            } else {
+                f.properties._fillColor = getCountryColor(f.properties.NAME || f.properties.ABBREVNAME || f.properties.FIPS_CODE || '');
             }
-            if (center) {
-                labelMap[name] = {
-                    type: 'Feature',
-                    geometry: { type: 'Point', coordinates: center },
-                    properties: { NAME: name }
-                };
+        });
+
+        // 国ごとに1つだけ中心点を作る
+        const labelMap = {};
+        geojson.features.forEach(f => {
+            const name = f.properties.NAME;
+            if (!labelMap[name]) {
+                // ポリゴンの中心を計算
+                let center = null;
+                if (f.geometry && f.geometry.coordinates) {
+                    center = getPolygonCenter(f.geometry.coordinates);
+                }
+                if (center) {
+                    labelMap[name] = {
+                        type: 'Feature',
+                        geometry: { type: 'Point', coordinates: center },
+                        properties: { NAME: name }
+                    };
+                }
             }
-        }
-    });
-    const labelGeojson = {
-        type: 'FeatureCollection',
-        features: Object.values(labelMap)
-    };
+        });
+        const labelGeojson = {
+            type: 'FeatureCollection',
+            features: Object.values(labelMap)
+        };
 
-    map.addSource('borders', { type: 'geojson', data: geojson });
-    // 塗りつぶしレイヤー
-    map.addLayer({
-        id: 'borders-fill',
-        type: 'fill',
-        source: 'borders',
-        paint: {
-            'fill-color': ['get', '_fillColor'],
-            'fill-opacity': 0.5
-        }
-    });
-    // 境界線レイヤー
-    map.addLayer({
-        id: 'borders-layer',
-        type: 'line',
-        source: 'borders',
-        paint: {
-            'line-color': year === 1938 ? '#2196f3' : '#f44336',
-            'line-width': 2
-        }
-    });
-    // ラベル用ポイントソース
-    map.addSource('borders-labels', { type: 'geojson', data: labelGeojson });
-    map.addLayer({
-        id: 'borders-label',
-        type: 'symbol',
-        source: 'borders-labels',
-        layout: {
-            'text-field': ['get', 'NAME'],
-            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-            'text-size': 14,
-            'text-anchor': 'center',
-            'text-allow-overlap': true
-        },
-        paint: {
-            'text-color': '#222',
-            'text-halo-color': '#fff',
-            'text-halo-width': 2
-        }
-    });
+        // ソースを追加
+        map.addSource('borders', { type: 'geojson', data: geojson });
+        map.addSource('borders-labels', { type: 'geojson', data: labelGeojson });
 
-    // Mapboxの既存ラベルを非表示
-    const labelLayerIds = [
-        'country-label', 'state-label', 'settlement-major-label', 'settlement-minor-label',
-        'poi-label', 'water-point-label', 'water-line-label', 'natural-point-label',
-        'natural-line-label', 'road-label', 'transit-label', 'airport-label', 'place-label'
-    ];
-    labelLayerIds.forEach(id => {
-        if (map.getLayer(id)) {
-            map.setLayoutProperty(id, 'visibility', 'none');
-        }
-    });
+        // ソースの読み込みを待ってからレイヤーを追加
+        map.on('sourcedata', (e) => {
+            if (e.sourceId === 'borders' && e.isSourceLoaded) {
+                // 塗りつぶしレイヤー
+                if (!map.getLayer('borders-fill')) {
+                    map.addLayer({
+                        id: 'borders-fill',
+                        type: 'fill',
+                        source: 'borders',
+                        paint: {
+                            'fill-color': ['get', '_fillColor'],
+                            'fill-opacity': 0.5
+                        }
+                    });
+                }
+                // 境界線レイヤー
+                if (!map.getLayer('borders-layer')) {
+                    map.addLayer({
+                        id: 'borders-layer',
+                        type: 'line',
+                        source: 'borders',
+                        paint: {
+                            'line-color': year === 1938 ? '#2196f3' : 
+                                        year === 1945 ? '#f44336' : 
+                                        '#4CAF50',
+                            'line-width': 2
+                        }
+                    });
+                }
+            }
+            if (e.sourceId === 'borders-labels' && e.isSourceLoaded) {
+                // ラベルレイヤー
+                if (!map.getLayer('borders-label')) {
+                    map.addLayer({
+                        id: 'borders-label',
+                        type: 'symbol',
+                        source: 'borders-labels',
+                        layout: {
+                            'text-field': ['get', 'NAME'],
+                            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                            'text-size': 14,
+                            'text-anchor': 'center',
+                            'text-allow-overlap': true
+                        },
+                        paint: {
+                            'text-color': '#222',
+                            'text-halo-color': '#fff',
+                            'text-halo-width': 2
+                        }
+                    });
+                }
+            }
+        });
+
+        // Mapboxの既存ラベルを非表示
+        const labelLayerIds = [
+            'country-label', 'state-label', 'settlement-major-label', 'settlement-minor-label',
+            'poi-label', 'water-point-label', 'water-line-label', 'natural-point-label',
+            'natural-line-label', 'road-label', 'transit-label', 'airport-label', 'place-label'
+        ];
+        labelLayerIds.forEach(id => {
+            if (map.getLayer(id)) {
+                map.setLayoutProperty(id, 'visibility', 'none');
+            }
+        });
+    } catch (error) {
+        console.error('Error loading borders:', error);
+    }
 }
 
 // 地図初期化時に1938年をデフォルト表示
@@ -302,18 +350,70 @@ map.on('load', () => {
 window.addEventListener('DOMContentLoaded', () => {
     const btn1938 = document.getElementById('btn-1938');
     const btn1945 = document.getElementById('btn-1945');
-    if (btn1938 && btn1945) {
-        btn1938.addEventListener('click', () => {
-            currentYear = 1938;
-            btn1938.classList.add('active');
-            btn1945.classList.remove('active');
-            loadBorders(1938);
+    const btn2024 = document.getElementById('btn-2024');
+
+    function updateButtonStates(activeButton) {
+        [btn1938, btn1945, btn2024].forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.remove('inactive');
         });
+        if (isMapVisible) {
+            activeButton.classList.add('active');
+        } else {
+            activeButton.classList.add('inactive');
+        }
+    }
+
+    function toggleMapVisibility() {
+        if (map.getLayer('borders-fill')) {
+            map.setLayoutProperty('borders-fill', 'visibility', isMapVisible ? 'visible' : 'none');
+        }
+        if (map.getLayer('borders-layer')) {
+            map.setLayoutProperty('borders-layer', 'visibility', isMapVisible ? 'visible' : 'none');
+        }
+        if (map.getLayer('borders-label')) {
+            map.setLayoutProperty('borders-label', 'visibility', isMapVisible ? 'visible' : 'none');
+        }
+    }
+
+    if (btn1938 && btn1945 && btn2024) {
+        btn1938.addEventListener('click', () => {
+            if (currentYear === 1938) {
+                isMapVisible = !isMapVisible;
+                toggleMapVisibility();
+                updateButtonStates(btn1938);
+            } else {
+                currentYear = 1938;
+                isMapVisible = true;
+                updateButtonStates(btn1938);
+                loadBorders(1938);
+            }
+        });
+
         btn1945.addEventListener('click', () => {
-            currentYear = 1945;
-            btn1945.classList.add('active');
-            btn1938.classList.remove('active');
-            loadBorders(1945);
+            if (currentYear === 1945) {
+                isMapVisible = !isMapVisible;
+                toggleMapVisibility();
+                updateButtonStates(btn1945);
+            } else {
+                currentYear = 1945;
+                isMapVisible = true;
+                updateButtonStates(btn1945);
+                loadBorders(1945);
+            }
+        });
+
+        btn2024.addEventListener('click', () => {
+            if (currentYear === 2024) {
+                isMapVisible = !isMapVisible;
+                toggleMapVisibility();
+                updateButtonStates(btn2024);
+            } else {
+                currentYear = 2024;
+                isMapVisible = true;
+                updateButtonStates(btn2024);
+                loadBorders(2024);
+            }
         });
     }
 }); 
