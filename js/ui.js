@@ -405,8 +405,8 @@ function setupEventListeners() {
         infoPopup.style.display = 'none';
     });
 
-    // 参加国ボタンのイベントリスナー
-    document.getElementById('countries-button').addEventListener('click', function() {
+    // 陣営色切り替えボタンのイベントリスナー
+    document.getElementById('faction-button').addEventListener('click', function() {
         const countriesPopup = document.getElementById('countries-popup');
         const overlay = document.querySelector('.overlay');
         
@@ -441,10 +441,5 @@ function setupEventListeners() {
         this.style.display = 'none';
         map.resize();
         initializeData();
-    });
-
-    // 陣営色切り替えボタンのイベントリスナー
-    document.getElementById('faction-button').addEventListener('click', function() {
-        toggleFactionColors();
     });
 } 
